@@ -1,9 +1,8 @@
-# 這是自動部署 Vite 到 GitHub Pages 的腳本
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ] # 確定你的分支名稱是 main
+    branches: [ "main" ] # 確保你的分支叫 main，如果是 master 請改掉
 
 permissions:
   contents: read
@@ -16,21 +15,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 刪除 cache: 'npm' 這行
+          # 已移除 cache: 'npm' 以避免找不到 lock 檔的錯誤
+
       - name: Install dependencies
         run: npm install
+
       - name: Build
         run: npm run build
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Vite 打包後的資料夾通常叫 dist
+          # Vite 預設打包後的資料夾是 dist
+          path: './dist'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
