@@ -274,9 +274,10 @@ export default function App() {
 
       {/* Sidebar */}
       <motion.div 
+        id="sidebar"
         initial={{ left: -260 }}
         animate={{ left: isSidebarOpen ? 0 : -260 }}
-        className="fixed top-0 w-[240px] h-full bg-white z-[9999] shadow-2xl pt-20"
+        className={`fixed top-0 w-[240px] h-full bg-white z-[9999] shadow-2xl pt-20 ${isSidebarOpen ? 'active' : ''}`}
       >
         <ul className="sidebar-menu">
           <li className={`nav-item ${activeTab === 'home' ? 'active-nav' : ''}`} onClick={() => { setActiveTab('home'); setIsSidebarOpen(false); }}>HOME</li>
@@ -331,7 +332,10 @@ export default function App() {
                 <div className="line line-2">如何成長的故事</div>
               </div>
 
-              <div className="timer-section">{timer}</div>
+              <div className="timer-section">
+                <div className="timer-label">Eleanora Cressel & Lucien Valemont</div>
+                {timer}
+              </div>
 
               <div className="wiki-section">
                 <div className="tabs">
