@@ -15,7 +15,6 @@ const TRIVIA_DATABASE = [
   "艾蕾諾菈私下的愛好非常單純：看書與享用甜食。",
   "路西恩不喜歡運動類活動，更偏好演奏音樂等靜態活動。",
   "莉雪有一位弟弟，她從小就被賦予了「必須養成合格侯爵繼承人」的重責大任。",
-  "米蕾優從小作為平民生活在農村，力氣大得驚人。",
   "在故事前期，艾蕾諾菈從未因傷心而哭泣，流過的眼淚僅是生理反射。",
   "驚人的事實：智商超群的艾蕾諾菈，其實是個徹底的路痴。",
   "卡修斯過去常以「確認人民生活狀況」為藉口，理直氣壯地翹掉禮儀課。",
@@ -136,8 +135,69 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [videoBlobUrl, setVideoBlobUrl] = useState<string | null>(null);
   const wasPlayingBeforeRef = useRef(false);
   const isBackgroundPlayingRef = useRef(isBackgroundPlaying);
+
+  const VIDEO_SRC = "https://raw.githubusercontent.com/albatron0523/my-illustrations/main/lv_0_20260118020351%20-%20Compressed%20with%20FlexClip.mp4";
+
+  const videoBlobUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const prefetchVideo = async () => {
+      try {
+        const response = await fetch(VIDEO_SRC, { signal: controller.signal });
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("ReadableStream not supported");
+
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            chunks.push(value);
+            loaded += value.length;
+            if (total > 0) {
+              setLoadProgress((loaded / total) * 100);
+            }
+          }
+        }
+
+        if (isMounted) {
+          const blob = new Blob(chunks, { type: 'video/mp4' });
+          const url = URL.createObjectURL(blob);
+          videoBlobUrlRef.current = url;
+          setVideoBlobUrl(url);
+          setLoadProgress(100);
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error("Video prefetch failed:", err);
+          setVideoBlobUrl(VIDEO_SRC);
+          setLoadProgress(100);
+        }
+      }
+    };
+
+    prefetchVideo();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      if (videoBlobUrlRef.current && videoBlobUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(videoBlobUrlRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     isBackgroundPlayingRef.current = isBackgroundPlaying;
@@ -199,7 +259,8 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
       if (v.duration > 0 && v.buffered.length > 0) {
         const bufferedEnd = v.buffered.end(v.buffered.length - 1);
         const p = (bufferedEnd / v.duration) * 100;
-        setLoadProgress(p);
+        // Only update if fetch didn't already set it to 100
+        setLoadProgress(prev => Math.max(prev, p));
       }
     };
 
@@ -265,16 +326,18 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
           <button 
             className="enter-btn-pv" 
             onClick={initShowcase}
-            disabled={loadProgress < 90}
+            disabled={loadProgress < 100}
           >
-            {loadProgress < 90 ? `LOADING ${Math.round(loadProgress)}%` : "ENTER // OCEAN EYES"}
+            {loadProgress < 100 ? `LOADING ${Math.round(loadProgress)}%` : "ENTER // OCEAN EYES"}
           </button>
+          <div className="loading-bar-container-pv">
+            <div className="loading-bar-fill-pv" style={{ width: `${loadProgress}%` }}></div>
+          </div>
         </div>
       )}
 
       <div className="video-side-pv">
-        <video ref={videoRef} id="v-pv" preload="auto" playsinline className={isReady ? 'ready' : ''}>
-          <source src="https://raw.githubusercontent.com/albatron0523/my-illustrations/main/lv_0_20260118020351%20-%20Compressed%20with%20FlexClip.mp4" type="video/mp4" />
+        <video ref={videoRef} id="v-pv" preload="auto" playsinline className={isReady ? 'ready' : ''} src={videoBlobUrl || undefined}>
         </video>
       </div>
 
