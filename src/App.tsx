@@ -61,7 +61,7 @@ const OBSERVATION_DATABASE = [
     nameZh: "艾洛蒂·拉維涅",
     nameEn: "Elody Ravigny",
     colors: { P: "#b08698", A: "#c7a3b2", H: "#bd97a7", Q: "#9c7083", B: "#d6c5cb" },
-    freshman: { quote: "「 」", attr: "風", mana: "74%", stability: "65%", talent: "B", ability: "已開發 15%", beastSync: "獨角獸 默契度 86%" },
+    freshman: { quote: "「來學校就是為了享受青春！對吧？ 」", attr: "風", mana: "74%", stability: "65%", talent: "B", ability: "已開發 15%", beastSync: "獨角獸 默契度 86%" },
     graduate: { quote: "「為什麼連努力也要攀比呢？你看，這雙手所長出的繭，是只有你有的，就像過程的痛與苦，只有你體驗過一樣。 」", attr: "風", mana: "79%", stability: "79%", talent: "B", ability: "已開發 76%", beastSync: "獨角獸 默契度 97%" }
   },
   {
