@@ -121,6 +121,8 @@ const ART_METADATA: Record<string, { title: string; date: string; artist: string
   '無標題887_20250622210234.png': { title: 'eyes', date: '2025年6月22日', artist: '青雲（作者）' },
   '無標題933_20250810153340.png': { title: '大頭', date: '2025年8月10日', artist: '青雲（作者）' },
   '無標題933_20250811052051.png': { title: '大頭', date: '2025年8月11日', artist: '青雲（作者）' },
+  '無標題1148.png': { title: '移不開的眼眸', date: '2026年4月1日', artist: '青雲（作者）' },
+  '無標題1129_20260402112145.png': { title: '未回首的視線', date: '2026年3月18日', artist: '青雲（作者）' },
 };
 
 const getArtInfo = (url: string) => {
@@ -133,6 +135,7 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [loadProgress, setLoadProgress] = useState(0);
   const wasPlayingBeforeRef = useRef(false);
   const isBackgroundPlayingRef = useRef(isBackgroundPlaying);
 
@@ -183,6 +186,21 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
         setIsBackgroundPlaying(true);
         wasPlayingBeforeRef.current = false;
       }
+      // 影片播完後自動往下滑進入畫廊
+      setTimeout(() => {
+        const gallery = document.querySelector('.gallery-outer');
+        if (gallery) {
+          gallery.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 800);
+    };
+
+    const onProgress = () => {
+      if (v.duration > 0 && v.buffered.length > 0) {
+        const bufferedEnd = v.buffered.end(v.buffered.length - 1);
+        const p = (bufferedEnd / v.duration) * 100;
+        setLoadProgress(p);
+      }
     };
 
     const onTimeUpdate = () => {
@@ -216,12 +234,16 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
     v.addEventListener('pause', onPause);
     v.addEventListener('ended', onEnded);
     v.addEventListener('timeupdate', onTimeUpdate);
+    v.addEventListener('progress', onProgress);
+    v.addEventListener('loadedmetadata', onProgress);
 
     return () => {
       v.removeEventListener('play', onPlay);
       v.removeEventListener('pause', onPause);
       v.removeEventListener('ended', onEnded);
       v.removeEventListener('timeupdate', onTimeUpdate);
+      v.removeEventListener('progress', onProgress);
+      v.removeEventListener('loadedmetadata', onProgress);
       // 如果組件卸載時影片正在播放且背景音樂被暫停了，則恢復背景音樂
       if (wasPlayingBeforeRef.current) {
         setIsBackgroundPlaying(true);
@@ -240,7 +262,13 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
     <div className={`master-container-pv ${isReady ? 'playing-pv' : ''}`} id="main-pv">
       {!isReady && (
         <div className="loading-overlay-pv" id="loader-pv">
-          <button className="enter-btn-pv" onClick={initShowcase}>ENTER // OCEAN EYES</button>
+          <button 
+            className="enter-btn-pv" 
+            onClick={initShowcase}
+            disabled={loadProgress < 90}
+          >
+            {loadProgress < 90 ? `LOADING ${Math.round(loadProgress)}%` : "ENTER // OCEAN EYES"}
+          </button>
         </div>
       )}
 
@@ -263,12 +291,12 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
 
         <div className="lyrics-viewport-pv">
           <div id="lyricList-pv">
-            <div className="lyric-line" data-time="0"><span className="translation">這不公平</span><span className="original">No fair</span></div>
+            <div className="lyric-line" data-time="0"><span className="translation">不公平</span><span className="original">No fair</span></div>
             <div className="lyric-line" data-time="6.88"><span className="translation">你真的很懂得如何讓我流淚</span><span className="original">You really know how to make me cry</span></div>
             <div className="lyric-line" data-time="9.56"><span className="translation">當你用那雙如海般的瞳孔注視著我</span><span className="original">When you give me those ocean eyes</span></div>
             <div className="lyric-line" data-time="13.38"><span className="translation">我感到恐懼</span><span className="original">I'm scared</span></div>
             <div className="lyric-line" data-time="20.21"><span className="translation">我不曾從如此高的地方墜落</span><span className="original">I've never fallen from quite this high</span></div>
-            <div className="lyric-line" data-time="22.78"><span className="translation">墜入之中</span><span className="original">Fallin' into your</span></div>
+            <div className="lyric-line" data-time="22.78"><span className="translation">墜入</span><span className="original">Fallin' into your</span></div>
             <div className="lyric-line" data-time="24.06"><span className="translation">你那深邃的眼眸</span><span className="original">ocean eyes</span></div>
             <div className="lyric-line" data-time="27.11"><span className="translation">那雙如海般的眼睛</span><span className="original">Those ocean eyes</span></div>
           </div>
@@ -1112,12 +1140,23 @@ export default function App() {
               <div className="gallery-title">༺ GALLERY ༻</div>
               <div className="scroll-container">
                 {[
+                  { 
+                    type: 'complex', 
+                    top: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1033_20260101025628.png',
+                    bottom: [
+                      'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題1148.png',
+                      'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題1129_20260402112145.png'
+                    ]
+                  },
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/IMG_5697.png' },
                   { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C951_20260118020109.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1067_20260118005441.png'] },
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1749826495034.jpg' },
-                  { type: 'complex', top: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1033_20260101025628.png', bottom: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235836.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235846.png'] },
+                  { 
+                    type: 'grid-2x2', 
+                    topRow: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250810153340.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250811052051.png'],
+                    bottomRow: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235836.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235846.png']
+                  },
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1769782908274.jpg' },
-                  { type: 'sq-pair', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250810153340.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250811052051.png'] },
                   { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C397_20251222082314.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C393_20251215195508.png'] },
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1121_20260219211404.png' },
                   { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622181052.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622210234.png'] },
@@ -1125,7 +1164,7 @@ export default function App() {
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C878_20250614021733.png' },
                   { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1103_20260210015346.png' },
                   { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1751735099362.jpg', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C860_20250618164117.png'] }
-                ].map((col, idx) => (
+                ].map((col: any, idx) => (
                   <div key={idx} className={`art-col col-${col.type}`}>
                     {col.type === 'portrait' && (
                       <div className={`art-frame ${selectedArt === col.url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === col.url ? null : col.url)}>
@@ -1139,7 +1178,7 @@ export default function App() {
                         )}
                       </div>
                     )}
-                    {(col.type === 'stack' || col.type === 'sq-pair') && col.urls.map((url, uidx) => (
+                    {col.type === 'stack' && col.urls.map((url: string, uidx: number) => (
                       <div key={uidx} className={`art-frame ${selectedArt === url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === url ? null : url)}>
                         <img src={url} alt="Art" referrerPolicy="no-referrer" />
                         {selectedArt === url && (
@@ -1151,6 +1190,38 @@ export default function App() {
                         )}
                       </div>
                     ))}
+                    {col.type === 'grid-2x2' && (
+                      <>
+                        <div className="grid-row">
+                          {col.topRow.map((url: string, tidx: number) => (
+                            <div key={tidx} className={`art-frame ${selectedArt === url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === url ? null : url)}>
+                              <img src={url} alt="Art" referrerPolicy="no-referrer" />
+                              {selectedArt === url && (
+                                <div className="art-info-panel">
+                                  <div className="info-item"><span>作品名：</span>{getArtInfo(url).title}</div>
+                                  <div className="info-item"><span>創作日期：</span>{getArtInfo(url).date}</div>
+                                  <div className="info-item"><span>繪師：</span>{getArtInfo(url).artist}</div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="grid-row">
+                          {col.bottomRow.map((url: string, bidx: number) => (
+                            <div key={bidx} className={`art-frame ${selectedArt === url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === url ? null : url)}>
+                              <img src={url} alt="Art" referrerPolicy="no-referrer" />
+                              {selectedArt === url && (
+                                <div className="art-info-panel">
+                                  <div className="info-item"><span>作品名：</span>{getArtInfo(url).title}</div>
+                                  <div className="info-item"><span>創作日期：</span>{getArtInfo(url).date}</div>
+                                  <div className="info-item"><span>繪師：</span>{getArtInfo(url).artist}</div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                     {col.type === 'complex' && (
                       <>
                         <div className={`art-frame top-frame ${selectedArt === col.top ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === col.top ? null : col.top)}>
