@@ -192,20 +192,19 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
 
 .support-item { 
   display: flex; 
-  flex-direction: column;
-  gap: 10px; 
+  flex-direction: row;
+  gap: 20px; 
   padding: 20px 0; 
   border-bottom: 1px dashed #eee; 
   align-items: flex-start; 
 }
-.support-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+.support-info {
+  flex: 1;
 }
+.support-char-name { font-size: 18px; color: var(--p); font-weight: bold; margin-bottom: 8px; }
+.support-desc { font-size: 14px; color: #666; line-height: 1.6; }
 .support-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #f8f8f8; flex-shrink: 0; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; }
 .support-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.support-char-name { font-size: 18px; color: var(--p); font-weight: bold; }
 
 .gallery-outer {
   padding: 30px 0 20px 0; 
@@ -215,6 +214,154 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   background-image: linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), 
                     url('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/21d1f82479dc6eec080d9e3f0d177698.jpg');
   background-position: center; background-size: cover; background-attachment: fixed;
+  transition: background 0.5s;
+}
+
+.gallery-outer.detail-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  overflow: hidden !important;
+  background-image: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), 
+                    url('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/21d1f82479dc6eec080d9e3f0d177698.jpg');
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.gallery-outer.detail-mode .gallery-title {
+  display: none;
+}
+
+.gallery-outer.detail-mode .scroll-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.gallery-outer.detail-mode .art-col {
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+.gallery-outer.detail-mode .art-col:not(:has(.selected)) {
+  position: absolute !important;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.gallery-outer.detail-mode .art-col:has(~ .art-col:has(.selected)) {
+  transform: translateX(-100vw) !important;
+}
+
+.gallery-outer.detail-mode .art-col:has(.selected) ~ .art-col {
+  transform: translateX(100vw) !important;
+}
+
+.gallery-outer.detail-mode .art-col:has(.selected) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transform: none !important;
+  z-index: 10000;
+}
+
+.art-frame {
+  position: relative;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--frame-bg); padding: 10px; box-shadow: var(--shadow); border-radius: 2px; border: 1px solid #ddd; cursor: pointer; display: inline-flex !important; flex: 0 0 auto; justify-content: center; align-items: center;
+}
+
+.art-frame.selected {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: scale(1.2) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 30px !important;
+  background: white !important;
+  padding: 12px !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2) !important;
+  border: 1px solid #eee !important;
+  border-radius: 4px !important;
+  z-index: 10000 !important;
+  cursor: zoom-out !important;
+  max-width: 85vw;
+  max-height: 80vh;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.art-frame.selected img {
+  max-height: 50vh !important;
+  width: auto !important;
+  display: block;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.art-info-panel {
+  position: static !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: 240px !important;
+  transform: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  text-align: left;
+  color: #444;
+}
+
+.info-item {
+  margin-bottom: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(138, 127, 156, 0.1);
+  padding-bottom: 5px;
+}
+
+.info-item span {
+  font-weight: 600;
+  color: var(--p);
+  display: inline-block;
+  width: 70px;
+}
+
+/* Move other images away */
+.gallery-outer.detail-mode .art-frame:not(.selected) {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute !important;
+}
+
+.art-col:has(.selected) .art-frame:not(.selected) {
+  transform: translateY(100vh) !important;
 }
 .gallery-title { 
   text-align: center; 
@@ -228,7 +375,6 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   font-family: var(--font-en);
 }
 .scroll-container { display: inline-flex; padding: 10px 100px 60px 100px; gap: 40px; align-items: center; }
-.art-frame { background: var(--frame-bg); padding: 10px; box-shadow: var(--shadow); border-radius: 2px; border: 1px solid #ddd; transition: all 0.4s ease; cursor: pointer; display: inline-flex !important; flex: 0 0 auto; justify-content: center; align-items: center; }
 .art-frame:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 .art-frame img { display: block; max-width: 100%; height: auto; object-fit: contain; }
 .art-col { display: flex; flex-direction: column; gap: 20px; flex: 0 0 auto; align-items: center; }
@@ -245,7 +391,68 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
 .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 20000; cursor: zoom-out; }
 .lightbox img { max-width: 90%; max-height: 90%; border: 5px solid #fff; }
 
-@media (max-width: 600px) { .char-flex { flex-direction: column; align-items: center; } .img-side { width: 250px; margin-top: 15px; } .char-content.active { display: flex; } }
+@media (max-width: 600px) {
+  .char-flex { flex-direction: column; align-items: center; }
+  .img-side { width: 250px; margin-top: 15px; }
+  .char-content.active { display: flex; }
+  
+  .support-item {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+  .support-avatar {
+    width: 50px !important;
+    height: 50px !important;
+  }
+  .support-char-name {
+    font-size: 16px !important;
+  }
+  .support-desc {
+    font-size: 13px !important;
+  }
+
+  .observation-card {
+    padding: 40px 20px 30px 20px !important;
+    margin: 15px auto !important;
+  }
+  .observation-card .card-controls {
+    position: static !important;
+    margin-bottom: 20px !important;
+    justify-content: flex-end !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .observation-card .toggle-btn {
+    padding: 4px 10px !important;
+    font-size: 10px !important;
+  }
+  .observation-card .name-zh { font-size: 24px !important; letter-spacing: 4px !important; }
+  .observation-card .name-en { font-size: 13px !important; }
+  .observation-card .stats-grid { gap: 15px !important; }
+
+  /* Gallery Detail Mobile */
+  .art-frame.selected {
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 15px !important;
+    max-height: 95vh;
+    width: 90vw;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+  .art-frame.selected img {
+    max-height: 50vh !important;
+  }
+  .art-info-panel {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .info-item span {
+    width: auto !important;
+    margin-right: 10px;
+  }
+}
 
 /* --- 程式 2 觀察檔案樣式 (隔離) --- */
 .observation-card {
@@ -595,6 +802,8 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     justify-content: center;
     margin-top: 40px;
     padding-bottom: 20px;
+    position: relative;
+    z-index: 100;
 }
 
 .mobile-back-to-top button {
