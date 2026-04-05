@@ -336,19 +336,21 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   flex-direction: column !important;
   justify-content: center !important;
   text-align: left;
-  color: #444;
+  color: #9c9372;
 }
 
 .info-item {
   margin-bottom: 12px;
   font-size: 14px;
-  border-bottom: 1px solid rgba(138, 127, 156, 0.1);
+  border-bottom: 1px solid rgba(138, 127, 156, 0.2);
   padding-bottom: 5px;
+  font-weight: 600;
+  color: #9c9372;
 }
 
 .info-item span {
   font-weight: 600;
-  color: var(--p);
+  color: #8a7f9c;
   display: inline-block;
   width: 70px;
 }
@@ -394,22 +396,30 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
 @media (max-width: 600px) {
   .char-flex { flex-direction: column; align-items: center; }
   .img-side { width: 250px; margin-top: 15px; }
-  .char-content.active { display: flex; }
+  .char-content.active { display: flex; flex-direction: column; width: 100%; }
   
   .support-item {
     flex-direction: row !important;
     align-items: flex-start !important;
     gap: 15px !important;
+    padding: 15px 0 !important;
+    width: 100% !important;
   }
   .support-avatar {
-    width: 50px !important;
-    height: 50px !important;
+    width: 55px !important;
+    height: 55px !important;
+    border: 1px solid #ddd !important;
   }
   .support-char-name {
-    font-size: 16px !important;
+    font-size: 15px !important;
+    margin-bottom: 6px !important;
+    color: #8a7f9c !important;
   }
   .support-desc {
-    font-size: 13px !important;
+    font-size: 12.5px !important;
+    line-height: 1.5 !important;
+    color: #777 !important;
+    word-break: break-all;
   }
 
   .observation-card {
@@ -830,4 +840,214 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     .article-title { font-size: 24px; }
     .article-body { font-size: 16px; }
     .mobile-back-to-top { display: flex; }
+}
+
+/* --- Ocean Eyes PV Showcase --- */
+.master-container-pv {
+    display: flex;
+    height: 85vh; 
+    max-width: 95vw;
+    aspect-ratio: 6 / 4;
+    background: #181818;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+    position: relative;
+    margin: 40px auto;
+    z-index: 10;
+}
+
+.video-side-pv {
+    height: 100%;
+    width: 50%;
+    aspect-ratio: 3 / 4;
+    background: #000;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.video-side-pv video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+}
+.video-side-pv video.ready { opacity: 1; }
+
+.ui-side-pv {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #181818;
+    padding: 0;
+    border-left: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.header-area-pv { 
+    flex-shrink: 0; 
+    z-index: 10; 
+    margin-bottom: 0; 
+    padding: 50px 40px 10px 40px;
+}
+.title-pv { font-size: 26px; font-weight: 900; color: #ffffff; letter-spacing: 2px; margin: 0; font-family: var(--font-en); }
+
+.controls-pv { display: flex; align-items: center; gap: 15px; margin-top: 20px; }
+.ctrl-btn-pv { background: none; border: none; color: white; cursor: pointer; font-size: 14px; opacity: 0.5; transition: 0.3s; }
+.ctrl-btn-pv:hover { opacity: 1; color: var(--p); }
+.seek-bar-pv { flex-grow: 1; height: 2px; background: #333; position: relative; cursor: pointer; border-radius: 1px; }
+.seek-progress-pv { position: absolute; left: 0; top: 0; height: 100%; background: var(--p); width: 0%; border-radius: 1px; }
+
+.lyrics-viewport-pv {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    margin-top: 0;
+    background: transparent;
+    border-radius: 0;
+    /* 調整遮罩範圍，讓更多歌詞可見 (從 15%/85% 改為 5%/95%) */
+    mask-image: linear-gradient(transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(transparent, black 5%, black 95%, transparent);
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.master-container-pv.playing-pv .lyrics-viewport-pv { opacity: 1; }
+
+#lyricList-pv {
+    position: absolute;
+    width: 100%;
+    /* 調整起始位置，讓整體顯示範圍更開闊 */
+    top: 40%;
+    left: 0;
+    transition: transform 0.7s cubic-bezier(0.2, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.lyric-line {
+    margin-bottom: 65px;
+    transition: all 0.6s ease;
+    transform: scale(0.9);
+    text-align: center;
+    width: 100%;
+    filter: blur(1.5px);
+    opacity: 0.2;
+}
+
+.lyric-line.active {
+    color: white;
+    transform: scale(1.05);
+    filter: blur(0);
+    opacity: 1;
+}
+
+.lyric-line .translation {
+    display: block;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.1);
+}
+.lyric-line .original {
+    display: block;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+.lyric-line.active .translation { color: #fff; }
+.lyric-line.active .original { color: var(--p); }
+
+.loading-overlay-pv {
+    position: absolute; inset: 0; background: rgba(24, 24, 24, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 100; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.enter-btn-pv {
+    padding: 16px 45px;
+    border: 1px solid var(--p);
+    color: var(--p);
+    cursor: pointer;
+    background: transparent;
+    letter-spacing: 5px;
+    font-size: 14px;
+    transition: 0.4s;
+    font-family: var(--font-en);
+}
+.enter-btn-pv:hover {
+    background: var(--p);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(138, 127, 156, 0.4);
+}
+
+@media (max-width: 850px) and (orientation: portrait) {
+    .master-container-pv { flex-direction: column; height: 100vh; width: 100vw; border-radius: 0; aspect-ratio: auto; margin: 0; }
+    .video-side-pv { width: 100%; height: 45%; aspect-ratio: auto; }
+    .ui-side-pv { width: 100%; height: 55%; border-left: none; border-top: 1px solid rgba(255,255,255,0.05); }
+    #lyricList-pv { top: 35%; }
+    .title-pv { font-size: 18px; }
+    .lyric-line .translation { font-size: 14px; }
+    .lyric-line .original { font-size: 9px; }
+}
+
+/* --- Credits Section --- */
+.credits-container {
+    width: 100%;
+    padding: 60px 20px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Noto Sans TC", "Helvetica", sans-serif;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 40px; /* 與上方內容保持距離 */
+}
+
+.credits-title {
+    color: #888888; 
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.credits-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.credit-btn {
+    text-decoration: none;
+    color: #555555;
+    border: 1px solid #dddddd;
+    padding: 7px 16px;
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+}
+
+.credit-btn:hover {
+    color: #8a7f9c;
+    border-color: #8a7f9c;
+    background-color: #faf9fb;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .credits-buttons {
+        flex-direction: column;
+        width: 180px;
+        gap: 8px;
+    }
+    .credit-btn {
+        text-align: center;
+    }
 }
