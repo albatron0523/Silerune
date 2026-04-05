@@ -218,16 +218,8 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
 }
 
 .gallery-outer.detail-mode {
-  position: static; /* Preserve scroll position by staying in flow */
-  min-height: 100vh;
+  position: static; /* Keep in flow to preserve scroll position */
   z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  margin: 0;
-  overflow: visible !important;
 }
 
 .gallery-outer.detail-mode::before {
@@ -235,41 +227,26 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   position: fixed;
   inset: 0;
   z-index: 9998;
-  background-image: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), 
-                    url('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/21d1f82479dc6eec080d9e3f0d177698.jpg');
-  background-position: center;
-  background-size: cover;
-  background-attachment: fixed;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
 }
 
 .gallery-outer.detail-mode .gallery-title {
-  display: none;
+  visibility: hidden;
 }
 
 .gallery-outer.detail-mode .scroll-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: auto;
-  min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
+  /* Keep layout unchanged to preserve scroll position */
 }
 
 .gallery-outer.detail-mode .art-col {
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  position: relative;
+  /* Keep layout unchanged */
 }
 
 .gallery-outer.detail-mode .art-col:not(:has(.selected)) {
-  visibility: hidden !important; /* Preserve height by not using absolute */
+  /* Keep hidden but in flow if possible or just hide */
+  opacity: 0.3;
   pointer-events: none;
-  opacity: 0;
 }
 
 .gallery-outer.detail-mode .art-col:has(~ .art-col:has(.selected)) {
@@ -281,14 +258,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
 }
 
 .gallery-outer.detail-mode .art-col:has(.selected) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  opacity: 1;
-  transform: none !important;
-  z-index: 10000;
+  /* Keep layout unchanged */
 }
 
 .art-frame {
@@ -899,13 +869,13 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     box-shadow: 0 6px 15px rgba(138, 127, 156, 0.3);
 }
 
-@media (max-width: 768px) {
-    .archive-container { flex-direction: column; height: auto; min-height: 98vh; width: 100%; margin: 0; border: none; box-shadow: none; }
-    .sidebar-archive { width: 100%; height: auto; padding: 20px 15px; box-sizing: border-box; border-right: none; border-bottom: 1px solid rgba(138, 127, 156, 0.1); }
-    .main-content-archive { padding: 40px 20px; }
-    .article-title { font-size: 24px; }
-    .article-body { font-size: 16px; }
-    .mobile-back-to-top { display: flex; }
+@media (max-width: 1024px) and (orientation: portrait) {
+    .archive-container { flex-direction: column !important; height: auto !important; min-height: 98vh !important; width: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+    .sidebar-archive { width: 100% !important; height: auto !important; padding: 20px 15px !important; box-sizing: border-box !important; border-right: none !important; border-bottom: 1px solid rgba(138, 127, 156, 0.1) !important; }
+    .main-content-archive { padding: 40px 20px !important; }
+    .article-title { font-size: 24px !important; }
+    .article-body { font-size: 16px !important; }
+    .mobile-back-to-top { display: flex !important; }
 }
 
 /* --- Ocean Eyes PV Showcase --- */
@@ -1074,7 +1044,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     box-shadow: 0 0 10px var(--p);
 }
 
-@media (max-width: 768px) and (orientation: portrait) {
+@media (max-width: 1024px) and (orientation: portrait) {
     .master-container-pv { 
         flex-direction: column !important; 
         height: auto !important; 
@@ -1092,6 +1062,18 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     .controls-pv { justify-content: center; }
     .lyric-line .translation { font-size: 16px !important; }
     .lyric-line .original { font-size: 10px !important; }
+}
+
+@media (max-width: 932px) and (orientation: landscape) {
+    .master-container-pv { height: 95vh !important; margin: 10px auto !important; }
+    .title-pv { font-size: 14px !important; }
+    .controls-pv { gap: 8px !important; margin-top: 5px !important; transform: scale(0.8); }
+    .ctrl-btn-pv { font-size: 10px !important; padding: 4px 8px !important; }
+    .seek-bar-pv { height: 1px !important; }
+    .lyric-line .translation { font-size: 14px !important; }
+    .lyric-line .original { font-size: 10px !important; }
+    .header-area-pv { padding: 10px 20px 2px 20px !important; }
+    .lyrics-viewport-pv { height: 150px !important; }
 }
 
 /* --- Credits Section --- */
@@ -1138,6 +1120,36 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     border-color: #8a7f9c;
     background-color: #faf9fb;
     transform: translateY(-1px);
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+    .gallery-outer { min-height: 100vh !important; height: auto !important; }
+    .art-frame.selected {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 90vw !important;
+        height: auto !important;
+        max-height: 90vh !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background: white !important;
+        padding: 20px !important;
+        border-radius: 8px !important;
+        z-index: 99999 !important;
+    }
+    .art-frame.selected img {
+        max-height: 45vh !important;
+        width: auto !important;
+        margin-bottom: 20px !important;
+    }
+    .art-info-panel {
+        width: 100% !important;
+        text-align: center !important;
+        color: #333 !important;
+    }
 }
 
 @media (max-width: 768px) {
