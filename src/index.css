@@ -213,12 +213,8 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   -webkit-overflow-scrolling: touch;
   background-image: linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), 
                     url('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/21d1f82479dc6eec080d9e3f0d177698.jpg');
-  background-position: center; 
-  background-size: cover; 
-  background-attachment: scroll; /* Fix zoomed background on mobile/tablet */
+  background-position: center; background-size: cover; background-attachment: fixed;
   transition: background 0.5s;
-  position: relative;
-  z-index: 1; /* Ensure it's below the video shadow if needed, but we'll reduce shadow */
 }
 
 .gallery-outer.detail-mode {
@@ -422,90 +418,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
   .observation-card .name-en { font-size: 13px !important; }
   .observation-card .stats-grid { gap: 15px !important; }
 
-  /* Gallery Detail Mobile & Tablet - Fixed Overlay to prevent scroll jump */
-  .gallery-outer.detail-mode {
-    position: static !important; /* Keep in flow to preserve scroll position */
-    height: auto !important;
-    overflow: visible !important;
-    min-height: 100vh !important;
-  }
-
-  .gallery-outer.detail-mode .art-col {
-    transition: none !important; /* Disable transition to prevent containing block for fixed children */
-  }
-
-  .gallery-outer.detail-mode .art-col:not(:has(.selected)) {
-    position: relative !important; /* Keep in flow to preserve scroll position */
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-
-  .gallery-outer.detail-mode .art-col:has(.selected) {
-    position: relative !important;
-    width: auto !important;
-    height: auto !important;
-    display: block !important;
-  }
-
-  .art-frame.selected {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    z-index: 99999 !important;
-    background: rgba(0,0,0,0.9) !important;
-    backdrop-filter: blur(8px);
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    padding: 60px 20px !important; /* Added padding for better spacing */
-    transform: none !important;
-    margin: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    cursor: zoom-out !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    overflow-y: auto !important;
-    justify-content: flex-start !important; /* Prevent cropping at top/bottom */
-  }
-
-  .art-frame.selected img {
-    max-height: 60vh !important;
-    width: auto !important;
-    max-width: 90vw !important;
-    object-fit: contain !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    margin-bottom: 30px !important;
-    flex-shrink: 0; /* Prevent image from shrinking */
-  }
-
-  .art-info-panel {
-    width: 90vw !important;
-    max-width: 500px !important;
-    background: white !important;
-    padding: 20px !important;
-    margin-top: 20px !important;
-    border-radius: 8px !important;
-    text-align: center !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-    color: #333 !important;
-  }
-
-  .info-item {
-    color: #555 !important;
-    border-bottom: 1px solid #eee !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 8px !important;
-  }
-
-  .info-item span {
-    width: auto !important;
-    margin-right: 5px;
-    color: var(--p) !important;
-  }
+  /* Gallery Detail Styles moved to 1024px block for consistency */
 }
 
 /* --- 程式 2 觀察檔案樣式 (隔離) --- */
@@ -877,32 +790,6 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     box-shadow: 0 6px 15px rgba(138, 127, 156, 0.3);
 }
 
-@media (max-width: 1024px) {
-    .gallery-outer { 
-        background-attachment: scroll !important; 
-        background-size: 100% auto !important;
-        background-position: top center !important;
-        margin-top: 0 !important;
-        padding-top: 40px !important;
-    }
-    .scroll-container {
-        padding: 20px 40px 100px 40px !important;
-        gap: 80px !important;
-    }
-    .art-col { gap: 40px !important; }
-    .col-portrait .art-frame img { max-height: 550px !important; }
-    .col-stack { width: 320px !important; }
-    .col-stack .art-frame img { max-height: 240px !important; }
-    .col-complex { width: 420px !important; }
-    .col-complex .top-frame img { max-height: 240px !important; }
-    .col-grid-2x2 { width: 680px !important; }
-    .grid-row .art-frame img { max-height: 240px !important; }
-    
-    .gallery-outer.detail-mode .scroll-container {
-        transform: none !important;
-    }
-}
-
 @media (max-width: 1024px) and (orientation: portrait) {
     .archive-container { flex-direction: column !important; height: auto !important; min-height: 98vh !important; width: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
     .sidebar-archive { width: 100% !important; height: auto !important; padding: 20px 15px !important; box-sizing: border-box !important; border-right: none !important; border-bottom: 1px solid rgba(138, 127, 156, 0.1) !important; }
@@ -910,6 +797,90 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     .article-title { font-size: 24px !important; }
     .article-body { font-size: 16px !important; }
     .mobile-back-to-top { display: flex !important; }
+
+    /* Gallery Adjustments for Tablet & Mobile */
+    .gallery-outer { 
+        min-height: 100vh !important; 
+        height: auto !important; 
+        background-attachment: scroll !important;
+        padding-top: 40px !important;
+    }
+
+    /* Selected Image Layout (Unified for Mobile & Tablet) */
+    .gallery-outer.detail-mode {
+      position: static !important;
+      height: auto !important;
+      overflow: visible !important;
+      min-height: 100vh !important;
+    }
+    .gallery-outer.detail-mode .art-col { transition: none !important; }
+    .gallery-outer.detail-mode .art-col:not(:has(.selected)) {
+      position: relative !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+    .gallery-outer.detail-mode .art-col:has(.selected) {
+      position: relative !important;
+      width: auto !important;
+      height: auto !important;
+      display: block !important;
+    }
+
+    .art-frame.selected {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        z-index: 99999 !important;
+        background: rgba(0,0,0,0.95) !important;
+        backdrop-filter: blur(8px);
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important; /* Start from top to prevent cropping */
+        align-items: center !important;
+        padding: 60px 20px !important; /* Top padding for breathing room */
+        transform: none !important;
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        cursor: zoom-out !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        overflow-y: auto !important; /* Scroll the whole overlay */
+    }
+    .art-frame.selected img {
+        max-height: none !important; /* Allow full height */
+        width: auto !important;
+        max-width: 90% !important;
+        margin-bottom: 20px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .art-info-panel {
+        width: 90vw !important;
+        max-width: 500px !important;
+        background: white !important;
+        padding: 20px !important;
+        margin-top: 0 !important;
+        margin-bottom: 60px !important; /* Bottom padding for the scroll */
+        border-radius: 8px !important;
+        text-align: center !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+        color: #333 !important;
+        flex-shrink: 0;
+    }
+    .info-item {
+        color: #555 !important;
+        border-bottom: 1px solid #eee !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    .info-item span {
+        width: auto !important;
+        margin-right: 5px;
+        color: var(--p) !important;
+    }
 }
 
 /* --- Ocean Eyes PV Showcase --- */
@@ -921,7 +892,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     background: #181818;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Further reduced shadow */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     position: relative;
     margin: 40px auto;
     z-index: 10;
@@ -1087,6 +1058,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
         border-radius: 0 !important; 
         aspect-ratio: auto !important; 
         margin: 0 !important; 
+        box-shadow: none !important; /* Remove shadow to avoid covering gallery */
     }
     .video-side-pv { width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important; }
     .ui-side-pv { width: 100% !important; height: auto !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.05) !important; padding: 20px !important; }
@@ -1156,48 +1128,7 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     transform: translateY(-1px);
 }
 
-@media (max-width: 1024px) and (orientation: portrait) {
-    .gallery-outer { min-height: 100vh !important; height: auto !important; }
-    .art-frame.selected {
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        margin: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
-        background: rgba(0,0,0,0.9) !important;
-        backdrop-filter: blur(10px) !important;
-        padding: 60px 20px !important;
-        border-radius: 0 !important;
-        z-index: 99999 !important;
-        overflow-y: auto !important;
-    }
-    .art-frame.selected img {
-        max-height: 55vh !important;
-        width: auto !important;
-        max-width: 90vw !important;
-        object-fit: contain !important;
-        margin-bottom: 30px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-        flex-shrink: 0 !important;
-    }
-    .art-info-panel {
-        width: 90vw !important;
-        max-width: 500px !important;
-        background: white !important;
-        padding: 25px !important;
-        border-radius: 12px !important;
-        text-align: center !important;
-        color: #333 !important;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4) !important;
-        flex-shrink: 0 !important;
-    }
-}
+/* Gallery Detail Styles moved to unified 1024px block above */
 
 @media (max-width: 768px) {
     .credits-buttons {
