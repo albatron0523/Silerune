@@ -61,7 +61,7 @@ const OBSERVATION_DATABASE = [
     nameZh: "艾洛蒂·拉維涅",
     nameEn: "Elody Ravigny",
     colors: { P: "#b08698", A: "#c7a3b2", H: "#bd97a7", Q: "#9c7083", B: "#d6c5cb" },
-    freshman: { quote: "「來學校就是為了享受青春！對吧？ 」", attr: "風", mana: "74%", stability: "65%", talent: "B", ability: "已開發 15%", beastSync: "獨角獸 默契度 86%" },
+    freshman: { quote: "「來學校就是為了享受青春！對吧？」", attr: "風", mana: "74%", stability: "65%", talent: "B", ability: "已開發 15%", beastSync: "獨角獸 默契度 86%" },
     graduate: { quote: "「為什麼連努力也要攀比呢？你看，這雙手所長出的繭，是只有你有的，就像過程的痛與苦，只有你體驗過一樣。 」", attr: "風", mana: "79%", stability: "79%", talent: "B", ability: "已開發 76%", beastSync: "獨角獸 默契度 97%" }
   },
   {
@@ -895,12 +895,21 @@ export default function App() {
                   {wikiTab === 'w3' && (
                     <div className="content-pane active">
                       <h3>✧ 克雷瑟家族 (Cressel)</h3>
-                      ✦ 地位：公爵。財力雄厚，領地大。<br />
-                      ✦ 公爵雷納德寵妻女但政治果斷，夫人長年臥病，僅有一女。
+                      ✦ 地位：公爵<br />
+                      ✦ 財力雄厚，領地大，多掌控北方領土<br />
+                      ✦ 公爵雷納德寵妻女但政治殺伐果斷，夫人長年臥病，僅有一女。
                       <h3>✧ 法雷蒙家族 (Valemont)</h3>
-                      ✦ 地位：伯爵。前伯爵傑羅得犧牲，遺孤路西恩被公爵艾多里安收養。<br />
-                      ✦ 養父母憎恨其光環，將路西恩訓練成完美少爺。<br />
-                      ✦ 親子席昂因高壓教育成長，對路西恩有嫉妒心但心不壞。
+                      ✦ 地位：伯爵<br />
+                      ✦ 前伯爵傑羅得犧牲，遺孤路西恩被現伯爵艾多里安收養<br />
+                      ✦ 養父母憎恨其光環，將路西恩訓練成完美少爺<br />
+                       <h3>✧ 瑟蘭家族 (Valemont)</h3>
+                      ✦ 地位：侯爵<br />
+                      ✦ 與克雷瑟家為世仇，有野心吞併克雷瑟家<br />
+                      ✦ 重男輕女，重視利益與子女的禮儀規矩<br />
+                      <h3>✧ 拉維涅家族 (Valemont)</h3>
+                      ✦ 地位：公爵(瓦爾托梅爾)<br />
+                      ✦ 拉維涅夫婦在該國以親切聞名，也寵家裡的兄妹檔<br />
+                      ✦ 重視家庭環境與孩子的眼界，不論多忙都會抽空帶小孩出去玩<br />
                     </div>
                   )}
                 </div>
