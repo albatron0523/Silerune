@@ -337,7 +337,7 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
       )}
 
       <div className="video-side-pv">
-        <video ref={videoRef} id="v-pv" preload="auto" playsInline controls className={isReady ? 'ready' : ''} src={videoBlobUrl || undefined}>
+        <video ref={videoRef} id="v-pv" preload="auto" playsinline className={isReady ? 'ready' : ''} src={videoBlobUrl || undefined}>
         </video>
       </div>
 
