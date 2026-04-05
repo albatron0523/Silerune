@@ -582,7 +582,7 @@ const SettingSupplement = () => {
     {
       category: "階級",
       title: "魔獸稀有度",
-      content: "根據學院紀錄，<span class='highlight'>龍</span>為極稀有級別，<span class='highlight'>鳳凰</span>屬於稀有級別。相較之下，蝙蝠、蛇、<span class='highlight'>曜隼</span>與獨角獸等則在貴族階層中較為普遍。"
+      content: "根據學院紀錄，<span class='highlight'>龍</span>為極稀有級別，<span class='highlight'>鳳凰</span>屬於稀有級別。相較之下，蝙蝠、蛇、曜隼與獨角獸等則在貴族階層中較為普遍。"
     }
   ];
 
