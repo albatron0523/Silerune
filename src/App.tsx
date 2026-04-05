@@ -322,6 +322,12 @@ const Library = () => {
           <h1 className="article-title">{chapter.title}</h1>
           <div className="article-meta">{chapter.meta}</div>
           <div dangerouslySetInnerHTML={{ __html: chapter.content }} />
+          
+          <div className="mobile-back-to-top">
+            <button onClick={() => readerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}>
+              回到頂部
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -462,6 +468,11 @@ export default function App() {
   const [triviaRotation, setTriviaRotation] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Scroll to top when switching tabs
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   // Initialize random character and trivia
   useEffect(() => {
@@ -964,4 +975,3 @@ export default function App() {
     </div>
   );
 }
-
