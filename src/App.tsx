@@ -324,7 +324,12 @@ const Library = () => {
           <div dangerouslySetInnerHTML={{ __html: chapter.content }} />
           
           <div className="mobile-back-to-top">
-            <button onClick={() => readerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <button onClick={() => {
+              if (readerRef.current) {
+                readerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}>
               回到頂部
             </button>
           </div>
@@ -381,7 +386,7 @@ const SettingSupplement = () => {
   );
 };
 
-const ObservationCard = ({ charId, onShuffle }: { charId: number, onShuffle: () => void }) => {
+const ObservationCard: React.FC<{ charId: number, onShuffle: () => void }> = ({ charId, onShuffle }) => {
   const [isGraduated, setIsGraduated] = useState(false);
   const data = OBSERVATION_DATABASE.find(c => c.id === charId);
   if (!data) return null;
@@ -462,6 +467,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [timer, setTimer] = useState("00 Days 00 Hours 00 Mins 00 Secs");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [selectedArt, setSelectedArt] = useState<string | null>(null);
   const [randomCharId, setRandomCharId] = useState(0);
   const [seenCharIds, setSeenCharIds] = useState<number[]>([]);
   const [currentTrivia, setCurrentTrivia] = useState("");
@@ -504,6 +510,12 @@ export default function App() {
   };
 
   // Timer Logic
+  useEffect(() => {
+    if (activeTab === 'char') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const diff = new Date().getTime() - new Date(2025, 4, 28).getTime();
@@ -644,7 +656,7 @@ export default function App() {
                   {wikiTab === 'w2' && (
                     <div className="content-pane active">
                       <h3>✧ 希鷺倫 (Silerune)</h3>
-                      ✦ 北方強國，坐擁豐富擴產，因此工業發達<br />
+                      ✦ 北方強國，坐擁豐富礦產，因此工業發達<br />
                       ✦ 將「水」視為信仰，當作與上帝溝通的渠道，秋季的豐收季時會舉辦慶典「潤恩節」，皇帝會邀請水系魔法師上台表演，民間也會有大量的攤販舉國歡慶<br />
                       ✦ 有北方聖地「艾爾哈爾達（Eirhalda）」，氣候雖寒冷但仍有許多人來朝聖
                       <h3>✧ 瓦爾托梅爾 (Valtomere)</h3>
@@ -674,7 +686,7 @@ export default function App() {
           <div className="sub-page active">
             <div className="top-content">
               <div className="char-container">
-                <ObservationCard charId={randomCharId} onShuffle={shuffleChar} />
+                <ObservationCard key={randomCharId} charId={randomCharId} onShuffle={shuffleChar} />
                 <SettingSupplement />
                 <div className="char-nav">
                   <div className={`char-node ${charTab === 'c1' ? 'active' : ''}`} onClick={() => setCharTab('c1')}>ELEANORA</div>
@@ -733,84 +745,84 @@ export default function App() {
                   {charTab === 'c3' && (
                     <div className="char-content active">
                       <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">
-                            <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題886_20250618214443.png" alt="Mireille" referrerPolicy="no-referrer" />
+                        <div className="support-avatar">
+                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題886_20250618214443.png" alt="Mireille" referrerPolicy="no-referrer" />
+                        </div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 米蕾優·布朗雪</div>
+                          <div className="support-desc">
+                            ✦ 艾蕾諾菈的貼身女僕<br />
+                            ✦ 溫和且是少數能讀懂艾蕾諾菈心意的人<br />
+                            ✦ 過去是在農村成長的平民，力氣頗大也擅長家事
                           </div>
-                          <span className="support-char-name">✧ 米蕾優·布朗雪</span>
-                        </div>
-                        <div>
-                          ✦ 艾蕾諾菈的貼身女僕<br />
-                          ✦ 溫和且是少數能讀懂艾蕾諾菈心意的人<br />
-                          ✦ 過去是在農村成長的平民，力氣頗大也擅長家事
                         </div>
                       </div>
 
                       <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">
-                            <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題913_20250708151336.png" alt="Licia" referrerPolicy="no-referrer" />
+                        <div className="support-avatar">
+                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題913_20250708151336.png" alt="Licia" referrerPolicy="no-referrer" />
+                        </div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 莉雪·瑟蘭</div>
+                          <div className="support-desc">
+                            ✦ 瑟蘭侯爵千金<br />
+                            ✦ 家族長年與克雷瑟家不對付，並有野心吞噬對方<br />
+                            ✦ 因家教+心儀路西恩對艾蕾諾菈心生嫉恨<br />
+                            ✦ 擅長社交而擁有不少人脈
                           </div>
-                          <span className="support-char-name">✧ 莉雪·瑟蘭</span>
-                        </div>
-                        <div>
-                          ✦ 瑟蘭侯爵千金<br />
-                          ✦ 家族長年與克雷瑟家不對付，並有野心吞噬對方<br />
-                          ✦ 因家教+心儀路西恩對艾蕾諾菈心生嫉恨<br />
-                          ✦ 擅長社交而擁有不少人脈
                         </div>
                       </div>
 
                       <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">席恩</div>
-                          <span className="support-char-name">✧ 席恩·法雷蒙</span>
-                        </div>
-                        <div>
-                          ✦ 路西恩的表哥<br />
-                          ✦ 被父母寵溺+寄予厚望，養成粗俗又自卑的個性，相比路西恩像還沒社會化的小孩<br />
-                          ✦ 嫉妒路西恩所擁有的聲望與能力
-                        </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">
-                            <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題915_20260109111842.png" alt="Elody" referrerPolicy="no-referrer" />
+                        <div className="support-avatar">席恩</div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 席恩·法雷蒙</div>
+                          <div className="support-desc">
+                            ✦ 路西恩的表哥<br />
+                            ✦ 被父母寵溺+寄予厚望，養成粗俗又自卑的個性，相比路西恩像還沒社會化的小孩<br />
+                            ✦ 嫉妒路西恩所擁有的聲望與能力
                           </div>
-                          <span className="support-char-name">✧ 艾洛蒂·拉維捏</span>
-                        </div>
-                        <div>
-                          ✦ 瓦爾托梅爾的公爵千金<br />
-                          ✦ 艾蕾諾菈的筆友，在學院與她第一次見面並迅速成為常常互動的朋友<br />
-                          ✦ 率真靈活，擅長引導他人走出傷痛
                         </div>
                       </div>
 
                       <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">伊維爾</div>
-                          <span className="support-char-name">✧ 伊維爾·艾凡</span>
+                        <div className="support-avatar">
+                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題915_20260109111842.png" alt="Elody" referrerPolicy="no-referrer" />
                         </div>
-                        <div>
-                          ✦ 魔法學院的校長，古老神話「奧雷菲斯・維洛恩」的後裔，有其遺物<br />
-                          ✦ 小男孩，舉止跳脫古怪，常被誤會是一年級新生<br />
-                          ✦ 魔法實力強大到足以滅國，被譽為「神之子」<br />
-                          ✦ 據說是前校長去世前強推上位的，各國國王其實都怒不敢言
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 艾洛蒂·拉維捏</div>
+                          <div className="support-desc">
+                            ✦ 瓦爾托梅爾的公爵千金<br />
+                            ✦ 艾蕾諾菈的筆友，在學院與她第一次見面並迅速成為常常互動的朋友<br />
+                            ✦ 率真靈活，擅長引導他人走出傷痛
+                          </div>
                         </div>
                       </div>
 
                       <div className="support-item">
-                        <div className="support-header">
-                          <div className="support-avatar">卡修斯</div>
-                          <span className="support-char-name">✧ 卡修斯·塞西爾</span>
+                        <div className="support-avatar">伊維爾</div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 伊維爾·艾凡</div>
+                          <div className="support-desc">
+                            ✦ 魔法學院的校長，古老神話「奧雷菲斯・維洛恩」的後裔，有其遺物<br />
+                            ✦ 小男孩，舉止跳脫古怪，常被誤會是一年級新生<br />
+                            ✦ 魔法實力強大到足以滅國，被譽為「神之子」<br />
+                            ✦ 據說是前校長去世前強推上位的，各國國王其實都怒不敢言
+                          </div>
                         </div>
-                        <div>
-                          ✦ 希鷺倫的二王子<br />
-                          ✦ 有野心並堅信自己未來會成為這個國家的國王<br />
-                          ✦ 是真的會對自己的人民與政策有所行動，例如：提前制定社福政策、保護素未謀面的人民<br />
-                          ✦ 喜歡艾蕾諾菈，並在明知她已訂婚的情況下試圖拉近距離。<br />
-                          其實他只是認為艾蕾諾菈適合當王妃，但不自知那不是真的愛。
+                      </div>
+
+                      <div className="support-item">
+                        <div className="support-avatar">卡修斯</div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 卡修斯·塞西爾</div>
+                          <div className="support-desc">
+                            ✦ 希鷺倫的二王子<br />
+                            ✦ 有野心並堅信自己未來會成為這個國家的國王<br />
+                            ✦ 是真的會對自己的人民與政策有所行動，例如：提前制定社福政策、保護素未謀面的人民<br />
+                            ✦ 喜歡艾蕾諾菈，並在明知她已訂婚的情況下試圖拉近距離。<br />
+                            其實他只是認為艾蕾諾菈適合當王妃，但不自知那不是真的愛。
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -846,112 +858,79 @@ export default function App() {
         {/* Tab: Art */}
         {activeTab === 'art' && (
           <div className="sub-page active">
-            <div className="gallery-outer">
+            <div className={`gallery-outer ${selectedArt ? 'detail-mode' : ''}`}>
               <div className="gallery-title">༺ GALLERY ༻</div>
               <div className="scroll-container">
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/IMG_5697.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/IMG_5697.png" alt="Art" referrerPolicy="no-referrer" />
+                {[
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/IMG_5697.png' },
+                  { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C951_20260118020109.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1067_20260118005441.png'] },
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1749826495034.jpg' },
+                  { type: 'complex', top: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1033_20260101025628.png', bottom: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235836.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235846.png'] },
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1769782908274.jpg' },
+                  { type: 'sq-pair', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250810153340.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250811052051.png'] },
+                  { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C397_20251222082314.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C393_20251215195508.png'] },
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1121_20260219211404.png' },
+                  { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622181052.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622210234.png'] },
+                  { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216121552.png', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216090827.png'] },
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C878_20250614021733.png' },
+                  { type: 'portrait', url: 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1103_20260210015346.png' },
+                  { type: 'stack', urls: ['https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1751735099362.jpg', 'https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C860_20250618164117.png'] }
+                ].map((col, idx) => (
+                  <div key={idx} className={`art-col col-${col.type}`}>
+                    {col.type === 'portrait' && (
+                      <div className={`art-frame ${selectedArt === col.url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === col.url ? null : col.url)}>
+                        <img src={col.url} alt="Art" referrerPolicy="no-referrer" />
+                        {selectedArt === col.url && (
+                          <div className="art-info-panel">
+                            <div className="info-item"><span>作品名：</span></div>
+                            <div className="info-item"><span>創作日期：</span></div>
+                            <div className="info-item"><span>繪師：</span></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(col.type === 'stack' || col.type === 'sq-pair') && col.urls.map((url, uidx) => (
+                      <div key={uidx} className={`art-frame ${selectedArt === url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === url ? null : url)}>
+                        <img src={url} alt="Art" referrerPolicy="no-referrer" />
+                        {selectedArt === url && (
+                          <div className="art-info-panel">
+                            <div className="info-item"><span>作品名：</span></div>
+                            <div className="info-item"><span>創作日期：</span></div>
+                            <div className="info-item"><span>繪師：</span></div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {col.type === 'complex' && (
+                      <>
+                        <div className={`art-frame top-frame ${selectedArt === col.top ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === col.top ? null : col.top)}>
+                          <img src={col.top} alt="Art" referrerPolicy="no-referrer" />
+                          {selectedArt === col.top && (
+                            <div className="art-info-panel">
+                              <div className="info-item"><span>作品名：</span></div>
+                              <div className="info-item"><span>創作日期：</span></div>
+                              <div className="info-item"><span>繪師：</span></div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="row-inner">
+                          {col.bottom.map((url, bidx) => (
+                            <div key={bidx} className={`art-frame ${selectedArt === url ? 'selected' : ''}`} onClick={() => setSelectedArt(selectedArt === url ? null : url)}>
+                              <img src={url} alt="Art" referrerPolicy="no-referrer" />
+                              {selectedArt === url && (
+                                <div className="art-info-panel">
+                                  <div className="info-item"><span>作品名：</span></div>
+                                  <div className="info-item"><span>創作日期：</span></div>
+                                  <div className="info-item"><span>繪師：</span></div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-                
-                <div className="art-col col-stack">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C951_20260118020109.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C951_20260118020109.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1067_20260118005441.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1067_20260118005441.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1749826495034.jpg')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1749826495034.jpg" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-complex">
-                  <div className="art-frame top-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1033_20260101025628.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1033_20260101025628.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="row-inner">
-                    <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235836.png')}>
-                      <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235836.png" alt="Art" referrerPolicy="no-referrer" />
-                    </div>
-                    <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235846.png')}>
-                      <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1102_20260208235846.png" alt="Art" referrerPolicy="no-referrer" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1769782908274.jpg')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1769782908274.jpg" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-sq-pair">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250810153340.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250810153340.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250811052051.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C933_20250811052051.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-stack">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C397_20251222082314.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C397_20251222082314.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C393_20251215195508.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C393_20251215195508.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1121_20260219211404.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1121_20260219211404.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-stack">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622181052.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622181052.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622210234.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C887_20250622210234.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-stack">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216121552.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216121552.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216090827.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1016_20251216090827.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C878_20250614021733.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C878_20250614021733.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-portrait">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1103_20260210015346.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C1103_20260210015346.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-
-                <div className="art-col col-stack">
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1751735099362.jpg')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/FB_IMG_1751735099362.jpg" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="art-frame" onClick={() => setLightboxImg('https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C860_20250618164117.png')}>
-                    <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/%E7%84%A1%E6%A8%99%E9%A1%8C860_20250618164117.png" alt="Art" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
