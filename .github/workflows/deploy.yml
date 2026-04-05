@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]  # 確保這是你的分支名字
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -15,18 +15,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # 這裡移除了 cache 設定，避免它去檢查不存在的 lock 檔
+
       - name: Install dependencies
-        run: npm i --package-lock=false
+        # 使用 --no-package-lock 強制安裝
+        run: npm install --no-package-lock
+
       - name: Build
+        # 執行打包指令
         run: npm run build
+
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
+          # 指向 Vite 預設的打包輸出資料夾
           path: "./dist"
 
   deploy:
