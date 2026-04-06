@@ -200,13 +200,6 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
     };
   }, []);
 
-  // Auto-play when loading is complete
-  useEffect(() => {
-    if (loadProgress >= 100 && !isReady) {
-      initShowcase();
-    }
-  }, [loadProgress, isReady]);
-
   useEffect(() => {
     isBackgroundPlayingRef.current = isBackgroundPlaying;
   }, [isBackgroundPlaying]);
@@ -336,7 +329,7 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
             onClick={initShowcase}
             disabled={loadProgress < 100}
           >
-            {loadProgress < 100 ? `LOADING ${Math.round(loadProgress)}%` : "ENTER // OCEAN EYES"}
+            {loadProgress < 100 ? `LOADING ${Math.round(loadProgress)}%` : "Start 播放"}
           </button>
           <div className="loading-bar-container-pv">
             <div className="loading-bar-fill-pv" style={{ width: `${loadProgress}%` }}></div>
