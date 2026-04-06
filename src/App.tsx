@@ -1165,6 +1165,30 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+                      
+                      <div className="support-item">
+                        <div className="support-avatar">奧斯丁</div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 奧斯丁·費雪</div>
+                          <div className="support-desc">
+                            ✦ 伊維爾的管家，現多處理學校行政事物<br />
+                            ✦ 原本生活順遂、自命不凡，因此看不起表現不出色的人，並對學生嚴厲，直到被剝奪貴族地位後，才在平民村落見識何為「人間」，再之後被伊維爾僱用<br />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="support-item">
+                        <div className="support-avatar">管理者</div>
+                        <div className="support-info">
+                          <div className="support-char-name">✧ 管理者</div>
+                          <div className="support-desc">
+                            ✦ 類似於世界神明的存在，但非必要不會回應「禱告」等儀式<br />
+                            ✦ 沒有感情，但會尊重人類的倫理道德<br />
+                            ✦ 本體無實體，因化作人形與人類溝通有利故幻化成神寵想變成的樣子<br />
+                            ✦ 會在人間挑選「神祭」協助管理世界
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
