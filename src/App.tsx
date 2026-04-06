@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -198,6 +199,13 @@ const OceanEyesShowcase: React.FC<{ isBackgroundPlaying: boolean, setIsBackgroun
       }
     };
   }, []);
+
+  // Auto-play when loading is complete
+  useEffect(() => {
+    if (loadProgress >= 100 && !isReady) {
+      initShowcase();
+    }
+  }, [loadProgress, isReady]);
 
   useEffect(() => {
     isBackgroundPlayingRef.current = isBackgroundPlaying;
