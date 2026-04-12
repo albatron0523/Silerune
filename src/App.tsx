@@ -779,6 +779,8 @@ export default function App() {
   const [wikiTab, setWikiTab] = useState('w1');
   const [charTab, setCharTab] = useState('c1');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioLoadProgress, setAudioLoadProgress] = useState(0);
+  const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [timer, setTimer] = useState("00 Days 00 Hours 00 Mins 00 Secs");
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
@@ -843,18 +845,76 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Audio Prefetch Logic
+  useEffect(() => {
+    let isMounted = true;
+    const AUDIO_SRC = "https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/蜜月アン・ドゥ・トロワ_ DATEKEN 【ピアノカバー】_320k (1).mp3";
+    
+    const prefetchAudio = async () => {
+      try {
+        const response = await fetch(AUDIO_SRC);
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("ReadableStream not supported");
+
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            chunks.push(value);
+            loaded += value.length;
+            if (total > 0) {
+              setAudioLoadProgress((loaded / total) * 100);
+            }
+          }
+        }
+
+        if (isMounted) {
+          const blob = new Blob(chunks, { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+          setAudioBlobUrl(url);
+          setAudioLoadProgress(100);
+        }
+      } catch (err) {
+        console.error("Audio prefetch failed:", err);
+        // Fallback to direct URL if prefetch fails
+        if (isMounted) {
+          setAudioBlobUrl(AUDIO_SRC);
+          setAudioLoadProgress(100);
+        }
+      }
+    };
+
+    prefetchAudio();
+
+    return () => {
+      isMounted = false;
+      if (audioBlobUrl && audioBlobUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(audioBlobUrl);
+      }
+    };
+  }, []);
+
   // Audio Logic
   useEffect(() => {
     if (audioRef.current) {
+      audioRef.current.volume = 1.0;
       if (isPlaying) {
         audioRef.current.play().catch(() => {});
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, audioBlobUrl]);
 
   const togglePlay = () => {
+    if (audioLoadProgress < 10) return;
     setIsPlaying(!isPlaying);
   };
 
@@ -913,7 +973,7 @@ export default function App() {
         {/* Background Music Audio (Always rendered for persistence) */}
         <audio 
           ref={audioRef}
-          src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/蜜月アン・ドゥ・トロワ_ DATEKEN 【ピアノカバー】_320k (1).mp3" 
+          src={audioBlobUrl || undefined} 
           loop 
           onTimeUpdate={handleTimeUpdate}
         />
@@ -929,7 +989,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="info-side">
-                  <div className="font-bold text-[#8a7f9c] text-sm mb-1">《 蜜月アン・ドゥ・トロワ 》</div>
+                  <div className="font-bold text-[#8a7f9c] text-sm mb-1">
+                    《 蜜月アン・ドゥ・トロワ 》
+                  </div>
                   <div className="progress-wrapper" onClick={seek}>
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: `${progress}%` }}></div>
@@ -937,7 +999,7 @@ export default function App() {
                   </div>
                   <div className="controls">
                     <div className="btn" onClick={() => audioRef.current && (audioRef.current.currentTime -= 10)}><SkipBack size={18} /></div>
-                    <div className="btn" onClick={togglePlay}>
+                    <div className={`btn ${audioLoadProgress < 10 ? 'opacity-30 cursor-not-allowed' : ''}`} onClick={togglePlay}>
                       {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                     </div>
                     <div className="btn" onClick={() => audioRef.current && (audioRef.current.currentTime += 10)}><SkipForward size={18} /></div>
