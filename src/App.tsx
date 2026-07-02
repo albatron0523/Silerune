@@ -7,6 +7,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from './firebase';
 
 const isValidDateStr = (str: string) => {
   if (!/^\d{4}\/\d{2}\/\d{2}$/.test(str)) return false;
@@ -743,48 +745,61 @@ const INITIAL_CHAPTERS = [
   );
 };
 
-const SettingSupplement = ({ isEditMode, onEdit }: { isEditMode?: boolean; onEdit?: () => void }) => {
-  const settingsDatabase = [
-    {
-      category: "能量",
-      title: "魔力增長規律",
-      content: "魔力量並非固定不變，透過冥想與實戰可獲得穩定增長，但每個體質皆存在一個<span class='highlight'>「隱形上限值」</span>，一旦觸及上限，後續的開發難度將呈幾何級數上升。"
-    },
-    {
-      category: "技術",
-      title: "規模與精度",
-      content: "<span class='highlight'>魔力量</span>直接影響魔法的影響範圍與物理威力；而<span class='highlight'>穩定性</span>則決定了魔法技術的細膩程度。魔力極高但穩定性極低者，容易造成魔力暴走。"
-    },
-    {
-      category: "共生",
-      title: "魔獸契合度",
-      content: "魔獸與其主人的<span class='highlight'>擅長屬性</span>息息相關。屬性越接近，同步率（Sync Rate）越高，發揮出的複合魔法威力也越強。"
-    },
-    {
-      category: "階級",
-      title: "魔獸稀有度",
-      content: "根據學院紀錄，<span class='highlight'>龍</span>為極稀有級別，<span class='highlight'>鳳凰</span>屬於稀有級別。相較之下，蝙蝠、蛇、曜隼與獨角獸等則在貴族階層中較為普遍。"
-    }
-  ];
+const SettingSupplement = ({ 
+  isEditMode, 
+  onEdit,
+  settingSupplementState,
+  currentSupplementIndex,
+  shuffleSupplement
+}: { 
+  isEditMode?: boolean; 
+  onEdit?: () => void;
+  settingSupplementState: {category: string, title: string, content: string}[];
+  currentSupplementIndex: number;
+  shuffleSupplement: () => void;
+}) => {
+  const item = settingSupplementState[currentSupplementIndex];
 
-  const [item, setItem] = useState<{category: string, title: string, content: string} | null>(null);
-
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * settingsDatabase.length);
-    setItem(settingsDatabase[randomIndex]);
-  }, []);
-
-  if (!item) return null;
+  if (!item) {
+    return (
+      <div className="setting-container relative">
+        {isEditMode && (
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
+            title="編輯補充資訊"
+          >
+            ✎
+          </button>
+        )}
+        <div className="setting-header">System Supplement // 資訊補充</div>
+        <div className="setting-item">
+          <div className="setting-content text-center text-gray-400 py-4">目前沒有資訊補充</div>
+        </div>
+        <div className="setting-footer">ACADEMY ARCHIVE SECTION</div>
+      </div>
+    );
+  }
 
   return (
     <div className="setting-container relative">
       {isEditMode && (
-        <button 
-          onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
-          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
-        >
-          ✎
-        </button>
+        <>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
+            title="編輯補充資訊"
+          >
+            ✎
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); shuffleSupplement(); }}
+            className="absolute top-2 left-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[12px] font-bold shadow-sm z-[100] transition-colors cursor-pointer animate-none"
+            title="隨機切換補充"
+          >
+            ↻
+          </button>
+        </>
       )}
       <div className="setting-header">System Supplement // 資訊補充</div>
       <div className="setting-item">
@@ -1026,8 +1041,51 @@ export default function App() {
   const [selectedArt, setSelectedArt] = useState<string | null>(null);
   const [randomCharId, setRandomCharId] = useState(0);
   const [seenCharIds, setSeenCharIds] = useState<number[]>([]);
+  const [triviaState, setTriviaState] = useState<string[]>(() => {
+    const saved = localStorage.getItem('trivia_state_v1');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return TRIVIA_DATABASE;
+  });
+  const [seenTriviaIndices, setSeenTriviaIndices] = useState<number[]>([]);
+  const [tempTriviaState, setTempTriviaState] = useState<string[] | null>(null);
   const [currentTrivia, setCurrentTrivia] = useState("");
   const [triviaRotation, setTriviaRotation] = useState(0);
+
+  // Setting Supplement States
+  const [settingSupplementState, setSettingSupplementState] = useState<{category: string; title: string; content: string}[]>(() => {
+    const saved = localStorage.getItem('setting_supplement_state_v1');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return [
+      {
+        category: "能量",
+        title: "魔力增長規律",
+        content: "魔力量並非固定不變，透過冥想與實戰可獲得穩定增長，但每個體質皆存在一個<span class='highlight'>「隱形上限值」</span>，一旦觸及上限，後續的開發難度將呈幾何級數上升。"
+      },
+      {
+        category: "技術",
+        title: "規模與精度",
+        content: "<span class='highlight'>魔力量</span>直接影響魔法的影響範圍與物理威力；而<span class='highlight'>穩定性</span>則決定了魔法技術的細膩程度。魔力極高但穩定性極低者，容易造成魔力暴走。"
+      },
+      {
+        category: "共生",
+        title: "魔獸契合度",
+        content: "魔獸與其主人的<span class='highlight'>擅長屬性</span>息息相關。屬性越接近，同步率（Sync Rate）越高，發揮出的複合魔法威力也越強。"
+      },
+      {
+        category: "階級",
+        title: "魔獸稀有度",
+        content: "根據學院紀錄，<span class='highlight'>龍</span>為極稀有級別，<span class='highlight'>鳳凰</span>屬於稀有級別。相較之下，蝙蝠、蛇、曜隼與獨角獸等則在貴族階層中較為普遍。"
+      }
+    ];
+  });
+  const [currentSupplementIndex, setCurrentSupplementIndex] = useState<number>(0);
+  const [seenSupplementIndices, setSeenSupplementIndices] = useState<number[]>([]);
+  const [tempSupplementState, setTempSupplementState] = useState<{category: string; title: string; content: string}[] | null>(null);
+  const [editModalSelectedIndex, setEditModalSelectedIndex] = useState<number>(0);
 
   // Editing States
   const [isEditMode, setIsEditMode] = useState(false);
@@ -1377,6 +1435,128 @@ export default function App() {
     localStorage.setItem('timer_target_date_v1', targetDateStr);
   }, [targetDateStr]);
 
+  useEffect(() => {
+    localStorage.setItem('trivia_state_v1', JSON.stringify(triviaState));
+  }, [triviaState]);
+
+  useEffect(() => {
+    localStorage.setItem('setting_supplement_state_v1', JSON.stringify(settingSupplementState));
+  }, [settingSupplementState]);
+
+  // Firebase Firestore Dynamic Sync & Load States
+  const [isDbLoaded, setIsDbLoaded] = useState(false);
+  const [dbSyncStatus, setDbSyncStatus] = useState<'loading' | 'synced' | 'saving' | 'error'>('loading');
+  const [dbErrorMsg, setDbErrorMsg] = useState<string | null>(null);
+
+  // Load from Firebase on component mount
+  useEffect(() => {
+    const loadFirebaseData = async () => {
+      setDbSyncStatus('loading');
+      try {
+        const docRef = doc(db, 'silerune', 'data');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.gallery_items_v1 !== undefined) setGalleryItemsState(data.gallery_items_v1);
+          if (data.gallery_title_v1 !== undefined) setGalleryTitle(data.gallery_title_v1);
+          if (data.characters_state_v1 !== undefined) setCharactersState(data.characters_state_v1);
+          if (data.observation_state_v1 !== undefined) setObservationState(data.observation_state_v1);
+          if (data.wiki_data_v1 !== undefined) setWikiData(data.wiki_data_v1);
+          if (data.chapters_state_v1 !== undefined) setChaptersState(data.chapters_state_v1);
+          if (data.art_metadata_v1 !== undefined) setArtMetadataState(data.art_metadata_v1);
+          if (data.player_config_v1 !== undefined) setPlayerConfig(data.player_config_v1);
+          if (data.preface_config_v1 !== undefined) setPrefaceConfig(data.preface_config_v1);
+          if (data.timer_target_date_v1 !== undefined) setTargetDateStr(data.timer_target_date_v1);
+          if (data.trivia_state_v1 !== undefined) setTriviaState(data.trivia_state_v1);
+          if (data.setting_supplement_state_v1 !== undefined) setSettingSupplementState(data.setting_supplement_state_v1);
+        } else {
+          // Initialize empty Firestore database with our current default states
+          const initialData = {
+            gallery_items_v1: galleryItemsState,
+            gallery_title_v1: galleryTitle,
+            characters_state_v1: charactersState,
+            observation_state_v1: observationState,
+            wiki_data_v1: wikiData,
+            chapters_state_v1: chaptersState,
+            art_metadata_v1: artMetadataState,
+            player_config_v1: playerConfig,
+            preface_config_v1: prefaceConfig,
+            timer_target_date_v1: targetDateStr,
+            trivia_state_v1: triviaState,
+            setting_supplement_state_v1: settingSupplementState,
+            updatedAt: new Date().toISOString()
+          };
+          await setDoc(docRef, initialData);
+        }
+        setIsDbLoaded(true);
+        setDbSyncStatus('synced');
+      } catch (err) {
+        console.error("Firebase load failed:", err);
+        setDbErrorMsg(err instanceof Error ? err.message : String(err));
+        setDbSyncStatus('error');
+        setIsDbLoaded(true); // Fallback to localStorage caching
+      }
+    };
+
+    loadFirebaseData();
+  }, []);
+
+  // Debounced auto-sync changes back to Firebase
+  useEffect(() => {
+    if (!isDbLoaded) return;
+
+    setDbSyncStatus('saving');
+    const docRef = doc(db, 'silerune', 'data');
+    const saveData = async () => {
+      try {
+        const updatedData = {
+          gallery_items_v1: galleryItemsState,
+          gallery_title_v1: galleryTitle,
+          characters_state_v1: charactersState,
+          observation_state_v1: observationState,
+          wiki_data_v1: wikiData,
+          chapters_state_v1: chaptersState,
+          art_metadata_v1: artMetadataState,
+          player_config_v1: playerConfig,
+          preface_config_v1: prefaceConfig,
+          timer_target_date_v1: targetDateStr,
+          trivia_state_v1: triviaState,
+          setting_supplement_state_v1: settingSupplementState,
+          updatedAt: new Date().toISOString()
+        };
+        await setDoc(docRef, updatedData);
+        setDbSyncStatus('synced');
+      } catch (err) {
+        console.error("Firebase save failed:", err);
+        setDbSyncStatus('error');
+        try {
+          handleFirestoreError(err, OperationType.WRITE, 'silerune/data');
+        } catch (e) {}
+      }
+    };
+
+    const delayDebounceFn = setTimeout(() => {
+      saveData();
+    }, 2000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [
+    galleryItemsState,
+    galleryTitle,
+    charactersState,
+    observationState,
+    wikiData,
+    chaptersState,
+    artMetadataState,
+    playerConfig,
+    prefaceConfig,
+    targetDateStr,
+    triviaState,
+    settingSupplementState,
+    isDbLoaded
+  ]);
+
   // Override top level getArtInfo if we want inside App component context
   const getArtInfo = (url: string) => {
     const filename = decodeURIComponent(url.split('/').pop() || '');
@@ -1420,6 +1600,13 @@ export default function App() {
       setTempObservationState(JSON.parse(JSON.stringify(observationState)));
       setEditingCharId(randomCharId);
       setEditingIsGraduated(observationIsGraduated);
+      setIsDirty(false);
+    } else if (activeEditSection === '角色趣聞') {
+      setTempTriviaState(JSON.parse(JSON.stringify(triviaState)));
+      setIsDirty(false);
+    } else if (activeEditSection === '檔案資訊補充') {
+      setTempSupplementState(JSON.parse(JSON.stringify(settingSupplementState)));
+      setEditModalSelectedIndex(0);
       setIsDirty(false);
     } else {
       setIsDirty(false);
@@ -1491,6 +1678,25 @@ export default function App() {
     setObservationState(tempObservationState);
     setRandomCharId(editingCharId);
     setObservationIsGraduated(editingIsGraduated);
+    setIsDirty(false);
+    setActiveEditSection(null);
+  };
+
+  const handleSaveTrivia = () => {
+    if (!tempTriviaState) return;
+    setTriviaState(tempTriviaState);
+    
+    if (tempTriviaState.length === 0) {
+      setCurrentTrivia("");
+    } else {
+      if (!tempTriviaState.includes(currentTrivia)) {
+        setCurrentTrivia(tempTriviaState[0]);
+        setSeenTriviaIndices([0]);
+      } else {
+        const newIdx = tempTriviaState.indexOf(currentTrivia);
+        setSeenTriviaIndices([newIdx]);
+      }
+    }
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -1615,8 +1821,17 @@ export default function App() {
     setRandomCharId(randomId);
     setSeenCharIds([randomId]);
     
-    const randomTrivia = TRIVIA_DATABASE[Math.floor(Math.random() * TRIVIA_DATABASE.length)];
-    setCurrentTrivia(randomTrivia);
+    if (triviaState.length > 0) {
+      const randomIdx = Math.floor(Math.random() * triviaState.length);
+      setCurrentTrivia(triviaState[randomIdx]);
+      setSeenTriviaIndices([randomIdx]);
+    }
+
+    if (settingSupplementState.length > 0) {
+      const randomIdx = Math.floor(Math.random() * settingSupplementState.length);
+      setCurrentSupplementIndex(randomIdx);
+      setSeenSupplementIndices([randomIdx]);
+    }
     setTriviaRotation(Number((Math.random() * 4 - 2).toFixed(1)));
   }, []);
 
@@ -1642,6 +1857,90 @@ export default function App() {
       setRandomCharId(nextId);
       setSeenCharIds([...seenCharIds, nextId]);
     }
+  };
+
+  const shuffleTrivia = () => {
+    if (triviaState.length === 0) return;
+    
+    const currentIndex = triviaState.indexOf(currentTrivia);
+    const availableIndices: number[] = [];
+    triviaState.forEach((_, idx) => {
+      if (!seenTriviaIndices.includes(idx)) {
+        availableIndices.push(idx);
+      }
+    });
+
+    if (availableIndices.length === 0 || (availableIndices.length === 1 && availableIndices[0] === currentIndex && triviaState.length > 1)) {
+      const resetPool = triviaState
+        .map((_, idx) => idx)
+        .filter(idx => triviaState.length <= 1 || idx !== currentIndex);
+      
+      const nextIdx = resetPool[Math.floor(Math.random() * resetPool.length)];
+      if (nextIdx !== undefined) {
+        setCurrentTrivia(triviaState[nextIdx]);
+        setSeenTriviaIndices([nextIdx]);
+      }
+    } else {
+      const filteredAvailable = availableIndices.filter(idx => triviaState.length <= 1 || idx !== currentIndex);
+      const targetPool = filteredAvailable.length > 0 ? filteredAvailable : availableIndices;
+      const nextIdx = targetPool[Math.floor(Math.random() * targetPool.length)];
+      if (nextIdx !== undefined) {
+        setCurrentTrivia(triviaState[nextIdx]);
+        setSeenTriviaIndices([...seenTriviaIndices, nextIdx]);
+      }
+    }
+    setTriviaRotation(Number((Math.random() * 4 - 2).toFixed(1)));
+  };
+
+  const shuffleSupplement = () => {
+    if (settingSupplementState.length === 0) return;
+    
+    const currentIndex = currentSupplementIndex;
+    const availableIndices: number[] = [];
+    settingSupplementState.forEach((_, idx) => {
+      if (!seenSupplementIndices.includes(idx)) {
+        availableIndices.push(idx);
+      }
+    });
+
+    if (availableIndices.length === 0 || (availableIndices.length === 1 && availableIndices[0] === currentIndex && settingSupplementState.length > 1)) {
+      const resetPool = settingSupplementState
+        .map((_, idx) => idx)
+        .filter(idx => settingSupplementState.length <= 1 || idx !== currentIndex);
+      
+      const nextIdx = resetPool[Math.floor(Math.random() * resetPool.length)];
+      if (nextIdx !== undefined) {
+        setCurrentSupplementIndex(nextIdx);
+        setSeenSupplementIndices([nextIdx]);
+      }
+    } else {
+      const filteredAvailable = availableIndices.filter(idx => settingSupplementState.length <= 1 || idx !== currentIndex);
+      const targetPool = filteredAvailable.length > 0 ? filteredAvailable : availableIndices;
+      const nextIdx = targetPool[Math.floor(Math.random() * targetPool.length)];
+      if (nextIdx !== undefined) {
+        setCurrentSupplementIndex(nextIdx);
+        setSeenSupplementIndices([...seenSupplementIndices, nextIdx]);
+      }
+    }
+  };
+
+  const handleSaveSupplement = () => {
+    if (!tempSupplementState) return;
+    setSettingSupplementState(tempSupplementState);
+    
+    if (tempSupplementState.length === 0) {
+      setCurrentSupplementIndex(0);
+      setSeenSupplementIndices([]);
+    } else {
+      if (currentSupplementIndex >= tempSupplementState.length) {
+        setCurrentSupplementIndex(0);
+        setSeenSupplementIndices([0]);
+      } else {
+        setSeenSupplementIndices([currentSupplementIndex]);
+      }
+    }
+    setIsDirty(false);
+    setActiveEditSection(null);
   };
 
   // Timer Logic
@@ -1972,7 +2271,33 @@ export default function App() {
               </div>
 
               <section className="credits-container">
-                <div className="credits-title">SOURCES 資料來源</div>
+                <div className="credits-title flex items-center justify-center gap-2 flex-wrap">
+                  <span>SOURCES 資料來源</span>
+                  {dbSyncStatus === 'loading' && (
+                    <span className="text-[10px] text-amber-500 font-bold ml-1.5 flex items-center gap-1">
+                      <span className="animate-pulse inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                      雲端載入中...
+                    </span>
+                  )}
+                  {dbSyncStatus === 'saving' && (
+                    <span className="text-[10px] text-[#8a7f9c] font-bold ml-1.5 flex items-center gap-1">
+                      <span className="animate-ping inline-block w-1.5 h-1.5 rounded-full bg-[#8a7f9c]"></span>
+                      正在同步至雲端...
+                    </span>
+                  )}
+                  {dbSyncStatus === 'synced' && (
+                    <span className="text-[10px] text-emerald-500 font-bold ml-1.5 flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      雲端已同步
+                    </span>
+                  )}
+                  {dbSyncStatus === 'error' && (
+                    <span className="text-[10px] text-rose-500 font-bold ml-1.5 flex items-center gap-1" title={dbErrorMsg || ""}>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      雲端同步中斷 (使用本機暫存)
+                    </span>
+                  )}
+                </div>
                 <div className="credits-buttons">
                   <a href="https://youtu.be/vajo0DgyZWU?si=Nz7lglPSkpizAXQP" target="_blank" rel="noopener noreferrer" className="credit-btn">
                     蜜月アン・ドゥ・トロワ
@@ -1998,7 +2323,13 @@ export default function App() {
             <div className="top-content">
               <div className="char-container">
                 <ObservationCard key={`${randomCharId}-${observationIsGraduated}`} charId={randomCharId} onSelectChar={handleSelectChar} isEditMode={isEditMode} onEdit={() => setActiveEditSection('學院檔案')} isGraduated={observationIsGraduated} setIsGraduated={setObservationIsGraduated} observationState={observationState} />
-                <SettingSupplement isEditMode={isEditMode} onEdit={() => setActiveEditSection('檔案資訊補充')} />
+                <SettingSupplement 
+                  isEditMode={isEditMode} 
+                  onEdit={() => setActiveEditSection('檔案資訊補充')} 
+                  settingSupplementState={settingSupplementState}
+                  currentSupplementIndex={currentSupplementIndex}
+                  shuffleSupplement={shuffleSupplement}
+                />
                 <div className="char-nav">
                   <div className={`char-node ${charTab === 'c1' ? 'active' : ''}`} onClick={() => setCharTab('c1')}>ELEANORA</div>
                   <div className={`char-node ${charTab === 'c2' ? 'active' : ''}`} onClick={() => setCharTab('c2')}>LUCIEN</div>
@@ -2179,12 +2510,22 @@ export default function App() {
                     style={{ transform: `rotate(${triviaRotation}deg)` }}
                   >
                     {isEditMode && (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setActiveEditSection('角色趣聞'); }}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
-                      >
-                        ✎
-                      </button>
+                      <>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setActiveEditSection('角色趣聞'); }}
+                          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
+                          title="編輯趣聞"
+                        >
+                          ✎
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); shuffleTrivia(); }}
+                          className="absolute top-2 left-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[12px] font-bold shadow-sm z-[100] transition-colors cursor-pointer animate-none"
+                          title="隨機切換趣聞"
+                        >
+                          ↻
+                        </button>
+                      </>
                     )}
                     <div className="pin"></div>
                     <span className="trivia-tag">✧ TRIVIA 趣聞 ✧</span>
@@ -4211,6 +4552,266 @@ export default function App() {
                         </div>
                       </div>
                     )}
+                  </div>
+                 ) : activeEditSection === '角色趣聞' && tempTriviaState ? (
+                  <div className="flex-grow flex flex-col justify-start items-stretch text-left overflow-hidden h-[55vh]">
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2 flex-shrink-0">
+                      <span className="text-xs font-bold text-gray-500">趣聞列表：</span>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const updated = [...tempTriviaState];
+                          updated.push("新角色趣聞內容");
+                          setTempTriviaState(updated);
+                          setIsDirty(true);
+                        }}
+                        className="text-xs text-[#8a7f9c] hover:text-[#746db5] font-semibold cursor-pointer"
+                      >
+                        + 新增趣聞
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 overflow-y-auto pr-2 mt-4 flex-grow">
+                      {tempTriviaState.map((triviaText: string, idx: number) => (
+                        <div key={idx} className="flex gap-2 items-start bg-gray-50/50 p-3 rounded-xl border border-gray-100 relative group">
+                          <span className="text-[10px] text-gray-400 font-bold font-mono pt-2 w-[45px] flex-shrink-0">
+                            趣聞 {idx + 1}
+                          </span>
+                          <textarea
+                            value={triviaText}
+                            onChange={(e) => {
+                              const updated = [...tempTriviaState];
+                              updated[idx] = e.target.value;
+                              setTempTriviaState(updated);
+                              setIsDirty(true);
+                            }}
+                            rows={2}
+                            className="flex-grow text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#8a7f9c] bg-white border border-gray-200 rounded-lg p-2 resize-none font-sans"
+                            placeholder="請輸入趣聞內容"
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const updated = [...tempTriviaState];
+                              updated.splice(idx, 1);
+                              setTempTriviaState(updated);
+                              setIsDirty(true);
+                            }}
+                            className="text-red-400 hover:text-red-600 text-xs font-bold pt-2 cursor-pointer flex-shrink-0"
+                            title="刪除"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                      {tempTriviaState.length === 0 && (
+                        <p className="text-gray-400 text-center text-xs py-10">目前沒有任何趣聞設定</p>
+                      )}
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0 bg-white">
+                      <button 
+                        onClick={handleCloseRequest}
+                        className="px-4 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        取消
+                      </button>
+                      <button 
+                        onClick={handleSaveTrivia}
+                        className="px-5 py-1.5 bg-[#8a7f9c] hover:bg-[#746db5] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        儲存
+                      </button>
+                    </div>
+                  </div>
+                ) : activeEditSection === '檔案資訊補充' && tempSupplementState ? (
+                  <div className="flex-grow flex flex-col justify-start items-stretch text-left overflow-hidden h-[55vh]">
+                    {/* Header with Title */}
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2 flex-shrink-0">
+                      <span className="text-xs font-bold text-gray-500">資訊補充列表：</span>
+                    </div>
+
+                    {/* Supplement buttons list with scroll and '+' button */}
+                    <div className="flex items-center gap-2 overflow-x-auto py-3 border-b border-gray-100 flex-shrink-0 scrollbar-thin">
+                      {tempSupplementState.map((sup, idx) => (
+                        <div key={idx} className="relative flex-shrink-0 flex items-center mr-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditModalSelectedIndex(idx);
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                              editModalSelectedIndex === idx
+                                ? "bg-[#8a7f9c] text-white border-[#8a7f9c]"
+                                : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                            }`}
+                          >
+                            {sup.title || `未命名項目 ${idx + 1}`}
+                          </button>
+                          
+                          {/* Option to delete this specific supplement */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const updated = [...tempSupplementState];
+                              updated.splice(idx, 1);
+                              setTempSupplementState(updated);
+                              if (editModalSelectedIndex >= updated.length) {
+                                setEditModalSelectedIndex(Math.max(0, updated.length - 1));
+                              }
+                              setIsDirty(true);
+                            }}
+                            className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-400 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow cursor-pointer border border-white"
+                            title="刪除此項目"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* Add Button '+' */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newItem = {
+                            category: "新類別",
+                            title: "新補充項目",
+                            content: "請輸入補充內容"
+                          };
+                          const updated = [...tempSupplementState, newItem];
+                          setTempSupplementState(updated);
+                          setEditModalSelectedIndex(updated.length - 1);
+                          setIsDirty(true);
+                        }}
+                        className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0 cursor-pointer border border-gray-200"
+                        title="新增新的補充"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Active Edit Form */}
+                    {tempSupplementState[editModalSelectedIndex] ? (
+                      <div className="flex-grow overflow-y-auto mt-4 space-y-4 pr-1">
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-400 mb-1">類型：</label>
+                          <input
+                            type="text"
+                            value={tempSupplementState[editModalSelectedIndex].category}
+                            onChange={(e) => {
+                              const updated = [...tempSupplementState];
+                              updated[editModalSelectedIndex] = {
+                                ...updated[editModalSelectedIndex],
+                                category: e.target.value
+                              };
+                              setTempSupplementState(updated);
+                              setIsDirty(true);
+                            }}
+                            className="w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-[#8a7f9c]"
+                            placeholder="類型 (例如: 共生)"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-400 mb-1">標題：</label>
+                          <input
+                            type="text"
+                            value={tempSupplementState[editModalSelectedIndex].title}
+                            onChange={(e) => {
+                              const updated = [...tempSupplementState];
+                              updated[editModalSelectedIndex] = {
+                                ...updated[editModalSelectedIndex],
+                                title: e.target.value
+                              };
+                              setTempSupplementState(updated);
+                              setIsDirty(true);
+                            }}
+                            className="w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-[#8a7f9c]"
+                            placeholder="標題 (例如: 魔獸契合度)"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-400 mb-1">內容：</label>
+                          <textarea
+                            id="supplement-content-textarea"
+                            value={tempSupplementState[editModalSelectedIndex].content}
+                            onChange={(e) => {
+                              const updated = [...tempSupplementState];
+                              updated[editModalSelectedIndex] = {
+                                ...updated[editModalSelectedIndex],
+                                content: e.target.value
+                              };
+                              setTempSupplementState(updated);
+                              setIsDirty(true);
+                            }}
+                            rows={4}
+                            className="w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-[#8a7f9c] font-sans resize-none"
+                            placeholder="內容描述..."
+                          />
+                          
+                          {/* Wrap in pink "A" button */}
+                          <div className="flex justify-between items-center mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                            <span className="text-[10px] text-gray-400">
+                              提示：選取文字後點擊粉色 A 按鈕，可將其設定為粉色重點字。
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const textarea = document.getElementById('supplement-content-textarea') as HTMLTextAreaElement;
+                                if (!textarea) return;
+                                const start = textarea.selectionStart;
+                                const end = textarea.selectionEnd;
+                                if (start === end) return;
+                                
+                                const text = textarea.value;
+                                const selectedText = text.substring(start, end);
+                                const beforeText = text.substring(0, start);
+                                const afterText = text.substring(end);
+                                
+                                const newContent = `${beforeText}<span class="highlight">${selectedText}</span>${afterText}`;
+                                
+                                const updated = [...tempSupplementState];
+                                updated[editModalSelectedIndex] = {
+                                  ...updated[editModalSelectedIndex],
+                                  content: newContent
+                                };
+                                setTempSupplementState(updated);
+                                setIsDirty(true);
+                                
+                                setTimeout(() => {
+                                  textarea.focus();
+                                  const newEnd = start + `<span class="highlight">`.length + selectedText.length + `</span>`.length;
+                                  textarea.setSelectionRange(start, newEnd);
+                                }, 0);
+                              }}
+                              className="w-6 h-6 rounded-md bg-[#ec4899] hover:bg-[#db2777] text-white flex items-center justify-center font-bold text-xs shadow-sm cursor-pointer transition-colors"
+                              title="選取文字變粉色"
+                            >
+                              A
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-center text-xs py-10">目前沒有任何補充內容，請點擊「+」新增。</p>
+                    )}
+
+                    <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0 bg-white">
+                      <button 
+                        onClick={handleCloseRequest}
+                        className="px-4 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        取消
+                      </button>
+                      <button 
+                        onClick={handleSaveSupplement}
+                        className="px-5 py-1.5 bg-[#8a7f9c] hover:bg-[#746db5] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        儲存
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
