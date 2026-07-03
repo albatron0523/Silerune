@@ -24,26 +24,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 💡 修正 1：升級 Node 24，並直接移除容易報錯的 cache 設定
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
-      # 💡 修正 2：改用 npm install，這樣就算沒有 lock 檔也能順利安裝
+      # 💡 重點修正：直接在根目錄執行 install 和 build，絕對不要加 cd 指令！
       - name: Install Dependencies & Build
         run: |
-          cd Silerune
           npm install
           npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # 💡 重點修正：直接抓根目錄產生的 dist 資料夾
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './Silerune/dist'
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: upload-pages
