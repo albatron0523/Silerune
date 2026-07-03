@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # 如果妳的主分支叫 master，請把這裡改成 master
+      - main
 
 permissions:
   contents: read
@@ -27,20 +27,20 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'Silerune/package-lock.json'
 
       - name: Install Dependencies & Build
         run: |
-          if [ -f "Silerune/package.json" ]; then
-            cd Silerune && npm install && npm run build
-          else
-            npm install && npm run build
-          fi
+          cd Silerune
+          npm ci
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Find and Upload Artifact
+      - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './Silerune/dist'
