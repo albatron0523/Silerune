@@ -18,7 +18,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }} # 💡 這裡修正成點（.）了！
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,11 +30,12 @@ jobs:
           node-version: 24
 
       - name: Install Dependencies
+        # 💡 這裡把所有的 npm ci 改成了 npm install，沒有 lock 檔也能跑！
         run: |
           if [ -f "Silerune/package.json" ]; then
-            cd Silerune && npm ci && npm run build
+            cd Silerune && npm install && npm run build
           else
-            npm ci && npm run build
+            npm install && npm run build
           fi
 
       - name: Setup Pages
@@ -50,5 +51,5 @@ jobs:
             Silerune/build
 
       - name: Deploy to GitHub Pages
-        id: deployment # 💡 對應上面的名稱
+        id: deployment
         uses: actions/deploy-pages@v4
