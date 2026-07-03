@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 export default defineConfig(() => {
   return {
     // 💡 關鍵修正：精準對齊你的 GitHub 專案倉庫名稱，前後斜線不能少
-    base: '/Silerune1/', 
+    base: '/Silerune/', 
 
     plugins: [react(), tailwindcss()],
     resolve: {
