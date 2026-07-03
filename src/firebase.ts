@@ -4,7 +4,8 @@ import { getFirestore } from 'firebase/firestore';
 export const firebaseConfig = {
   apiKey: "AIzaSyD52EMIKjauVO3Tlo71asmyWmIYiORpc0c",
   authDomain: "silerune-ee33e.firebaseapp.com",
-  databaseURL: "https://silerune-ee33e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  // 📢 已經修正為正確的台灣機房網址 (asia-east1)
+  databaseURL: "https://silerune-ee33e-default-rtdb.asia-east1.firebasedatabase.app",
   projectId: "silerune-ee33e",
   storageBucket: "silerune-ee33e.firebasestorage.app",
   messagingSenderId: "1015874304350",
