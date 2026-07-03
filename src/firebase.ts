@@ -13,4 +13,4 @@ const firebaseConfig = {
 // 初始化 Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const docRef = doc(db, "websites", "homepage");
+export const docRef = doc(db, "silerune", "data");
