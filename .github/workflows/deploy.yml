@@ -2,47 +2,35 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
-  build_site:
+  build-and-deploy:
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node ⚙️
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 這裡移除了 cache 設定，避免它去檢查不存在的 lock 檔
+          cache: npm
 
-      - name: Install dependencies
-        # 使用 --no-package-lock 強制安裝
-        run: npm install --no-package-lock
+      - name: Install and Build 🔧
+        run: |
+          npm install
+          npm run build
 
-      - name: Build
-        # 執行打包指令
-        run: npm run build
-
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          # 指向 Vite 預設的打包輸出資料夾
-          path: "./dist"
-
-  deploy:
-    needs: build_site
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          folder: dist
+          branch: gh-pages
