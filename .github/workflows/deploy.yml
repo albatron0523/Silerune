@@ -3,34 +3,54 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
-      - master
-  workflow_dispatch:
+      - main # 如果妳的主分支叫 master，請把這裡改成 master
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    concurrency: ci-${{ github.ref }}
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps:deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node ⚙️
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24 # 直接升級到最新不卡頓的 Node 24
 
-      - name: Install and Build 🔧
+      - name: Install Dependencies
+        # 💡 強迫機器人在正確的目錄下安裝與打包（防止雙重資料夾找不到檔案）
         run: |
-          npm install
-          npm run build
+          if [ -f "Silerune/package.json" ]; then
+            cd Silerune && npm ci && npm run build
+          else
+            npm ci && npm run build
+          fi
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: dist
-          branch: gh-pages
+          # 💡 自動辨識打包出來的資料夾位置
+          path: |
+            dist
+            Silerune/dist
+            build
+            Silerune/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
