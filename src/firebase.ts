@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBUVbe9YAS2qU01DcIiTVTfHJ6rQUzTluk",
-  authDomain: "v2345-66433.firebaseapp.com",
-  projectId: "v2345-66433",
-  storageBucket: "v2345-66433.firebasestorage.app",
-  messagingSenderId: "326140874923",
-  appId: "1:326140874923:web:594fcda27b3486e682e7ee"
+  apiKey: "...",              // 换成 silerune-ee33e 的
+  authDomain: "silerune-ee33e.firebaseapp.com",
+  projectId: "silerune-ee33e",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
 };
 
 // 初始化 Firebase
