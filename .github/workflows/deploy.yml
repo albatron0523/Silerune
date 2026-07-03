@@ -43,9 +43,7 @@ jobs:
       - name: Find and Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: |
-            **/dist
-            **/build
+          path: './Silerune/dist'
 
       - name: Deploy to GitHub Pages
         id: upload-pages
