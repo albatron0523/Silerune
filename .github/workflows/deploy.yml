@@ -18,7 +18,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps:deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }} # 💡 這裡修正成點（.）了！
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,10 +27,9 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # 直接升級到最新不卡頓的 Node 24
+          node-version: 24
 
       - name: Install Dependencies
-        # 💡 強迫機器人在正確的目錄下安裝與打包（防止雙重資料夾找不到檔案）
         run: |
           if [ -f "Silerune/package.json" ]; then
             cd Silerune && npm ci && npm run build
@@ -44,7 +43,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 💡 自動辨識打包出來的資料夾位置
           path: |
             dist
             Silerune/dist
@@ -52,5 +50,5 @@ jobs:
             Silerune/build
 
       - name: Deploy to GitHub Pages
-        id: deployment
+        id: deployment # 💡 對應上面的名稱
         uses: actions/deploy-pages@v4
