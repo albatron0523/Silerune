@@ -24,17 +24,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 💡 修正 1：升級 Node 24，並直接移除容易報錯的 cache 設定
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'Silerune/package-lock.json'
+          node-version: 24
 
+      # 💡 修正 2：改用 npm install，這樣就算沒有 lock 檔也能順利安裝
       - name: Install Dependencies & Build
         run: |
           cd Silerune
-          npm ci
+          npm install
           npm run build
 
       - name: Setup Pages
