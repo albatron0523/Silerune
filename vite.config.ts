@@ -5,9 +5,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    // 💡 把它改成 './'，這代表使用相對路徑
-    // 這樣不管你的 GitHub 專案叫什麼名字，網頁都能百分之百精準抓到同目錄下的資源！
-    base: './', 
+    // 💡 關鍵修正：精準對齊你的 GitHub 專案倉庫名稱，前後斜線不能少
+    base: '/Silerune1/', 
 
     plugins: [react(), tailwindcss()],
     resolve: {
