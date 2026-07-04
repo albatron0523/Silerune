@@ -1,24 +1,14 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches:
       - main
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  contents: write
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.upload-pages.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,21 +19,13 @@ jobs:
         with:
           node-version: 24
 
-      # 💡 重點修正：直接在根目錄執行 install 和 build，絕對不要加 cd 指令！
       - name: Install Dependencies & Build
         run: |
           npm install
           npm run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      # 💡 重點修正：直接抓根目錄產生的 dist 資料夾
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: './dist'
-
-      - name: Deploy to GitHub Pages
-        id: upload-pages
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
