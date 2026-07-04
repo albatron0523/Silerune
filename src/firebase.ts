@@ -2,15 +2,17 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBUVbe9YAS2qU01DcIiTVTfHJ6rQUzTluk",
-  authDomain: "v2345-66433.firebaseapp.com",
-  projectId: "v2345-66433",
-  storageBucket: "v2345-66433.firebasestorage.app",
-  messagingSenderId: "326140874923",
-  appId: "1:326140874923:web:594fcda27b3486e682e7ee"
+  apiKey: "AIzaSyD52EMIKjauVO3Tlo71asmyWmIYiORpc0c",
+  authDomain: "silerune-ee33e.firebaseapp.com",
+  databaseURL: "https://silerune-ee33e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "silerune-ee33e",
+  storageBucket: "silerune-ee33e.firebasestorage.app",
+  messagingSenderId: "1015874304350",
+  appId: "1:1015874304350:web:f3664bca3fe9b7c92c37cf",
+  measurementId: "G-195K1TEWXM"
 };
 
 // 初始化 Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const docRef = doc(db, "websites", "homepage");
+export const docRef = doc(db, "silerune", "data");
