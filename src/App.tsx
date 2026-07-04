@@ -1537,6 +1537,39 @@ export default function App() {
           if (data.targetDateStr !== undefined) {
             setTargetDateStr(data.targetDateStr);
           }
+          if (data.charactersState !== undefined) {
+            setCharactersState(data.charactersState);
+          }
+          if (data.chaptersState !== undefined) {
+            setChaptersState(data.chaptersState);
+          }
+          if (data.wikiData !== undefined) {
+            setWikiData(data.wikiData);
+          }
+          if (data.galleryItemsState !== undefined) {
+            setGalleryItemsState(data.galleryItemsState);
+          }
+          if (data.artMetadataState !== undefined) {
+            setArtMetadataState(data.artMetadataState);
+          }
+          if (data.observationState !== undefined) {
+            setObservationState(data.observationState);
+          }
+          if (data.triviaList !== undefined) {
+            setTriviaList(data.triviaList);
+          }
+          if (data.supplementList !== undefined) {
+            setSupplementList(data.supplementList);
+          }
+          if (data.videoListState !== undefined) {
+            setVideoListState(data.videoListState);
+          }
+          if (data.playerConfig !== undefined) {
+            setPlayerConfig(data.playerConfig);
+          }
+          if (data.sources !== undefined) {
+            setSources(data.sources);
+          }
           setFirebaseStatus('success');
         } else {
           setFirebaseStatus('success');
@@ -1548,6 +1581,18 @@ export default function App() {
     };
     fetchFirebaseData();
   }, []);
+
+  // Generic field sync to Firestore (used by individual save handlers below)
+  const saveFieldToFirebase = async (field: string, value: any) => {
+    try {
+      await setDoc(docRef, {
+        [field]: value,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (error) {
+      console.error(`Error syncing ${field} to Firebase:`, error);
+    }
+  };
 
   // Save to Firestore function
   const handleSaveToFirebase = async () => {
@@ -2416,12 +2461,14 @@ export default function App() {
       families: cleanedFamilies
     };
     setWikiData(finalWiki);
+    saveFieldToFirebase('wikiData', finalWiki);
     setIsDirty(false);
     setActiveEditSection(null);
   };
 
   const handleSaveChapters = () => {
     setChaptersState(tempChaptersState);
+    saveFieldToFirebase('chaptersState', tempChaptersState);
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -2431,13 +2478,16 @@ export default function App() {
       const updated = [...tempChaptersState];
       updated[editingChapterIndex].content = plainTextToHtml(tempChapterContentText);
       setChaptersState(updated);
+      saveFieldToFirebase('chaptersState', updated);
       setIsDirty(false);
       setActiveEditSection(null);
     }
   };
 
   const handleSaveGalleryLayout = () => {
-    setGalleryItemsState(JSON.parse(JSON.stringify(tempGalleryItemsState)));
+    const updatedLayout = JSON.parse(JSON.stringify(tempGalleryItemsState));
+    setGalleryItemsState(updatedLayout);
+    saveFieldToFirebase('galleryItemsState', updatedLayout);
     setIsLayoutDirty(false);
     setIsDirty(false);
   };
@@ -2512,7 +2562,9 @@ export default function App() {
     setArtMetadataState(tempArtMetadataState);
     setGalleryItemsState(updatedPermanent);
     setGalleryTitle(tempGalleryTitle);
-    
+    saveFieldToFirebase('artMetadataState', tempArtMetadataState);
+    saveFieldToFirebase('galleryItemsState', updatedPermanent);
+
     if (!isLayoutDirty) {
       setIsDirty(false);
     }
@@ -2522,6 +2574,7 @@ export default function App() {
   const handleSaveCharacterIntro = () => {
     if (!tempCharIntroState) return;
     setCharactersState(tempCharIntroState);
+    saveFieldToFirebase('charactersState', tempCharIntroState);
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -2529,6 +2582,7 @@ export default function App() {
   const handleSaveObservation = () => {
     if (!tempObservationState) return;
     setObservationState(tempObservationState);
+    saveFieldToFirebase('observationState', tempObservationState);
     setRandomCharId(editingCharId);
     setObservationIsGraduated(editingIsGraduated);
     setIsDirty(false);
@@ -2538,6 +2592,7 @@ export default function App() {
   const handleSaveTrivia = () => {
     if (!tempTriviaList) return;
     setTriviaList(tempTriviaList);
+    saveFieldToFirebase('triviaList', tempTriviaList);
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -2545,6 +2600,7 @@ export default function App() {
   const handleSaveSupplement = () => {
     if (!tempSupplementList) return;
     setSupplementList(tempSupplementList);
+    saveFieldToFirebase('supplementList', tempSupplementList);
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -2552,6 +2608,7 @@ export default function App() {
   const handleSaveVideoList = () => {
     if (!tempVideoList) return;
     setVideoListState(tempVideoList);
+    saveFieldToFirebase('videoListState', tempVideoList);
     setIsDirty(false);
     setActiveEditSection(null);
   };
@@ -2669,7 +2726,9 @@ export default function App() {
       url = "https://" + url;
     }
     
-    setSources([...sources, { name: newSourceName.trim(), url }]);
+    const updatedSources = [...sources, { name: newSourceName.trim(), url }];
+    setSources(updatedSources);
+    saveFieldToFirebase('sources', updatedSources);
     setShowAddSourceModal(false);
     setNewSourceName('');
     setNewSourceUrl('');
@@ -3141,7 +3200,9 @@ export default function App() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            setSources(sources.filter((_, i) => i !== idx));
+                            const updatedSources = sources.filter((_, i) => i !== idx);
+                            setSources(updatedSources);
+                            saveFieldToFirebase('sources', updatedSources);
                           }}
                           className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center text-[10px] font-bold z-10 cursor-pointer shadow transition-transform hover:scale-110"
                         >
@@ -4692,9 +4753,10 @@ export default function App() {
                       >
                         取消
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setPlayerConfig(tempPlayerConfig);
+                          saveFieldToFirebase('playerConfig', tempPlayerConfig);
                           setIsDirty(false);
                           setActiveEditSection(null);
                         }}
