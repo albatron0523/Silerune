@@ -1505,10 +1505,6 @@ export default function App() {
     };
   });
 
-  // Firebase Sync State
-  const [isFirebaseEditing, setIsFirebaseEditing] = useState(false);
-  const [firebaseStatus, setFirebaseStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [firebaseSaveStatus, setFirebaseSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [timerLabel, setTimerLabel] = useState(() => {
     return localStorage.getItem('timer_label_v1') || "Eleanora Cressel & Lucien Valemont";
   });
@@ -1520,7 +1516,6 @@ export default function App() {
   // Load from Firestore on mount
   useEffect(() => {
     const fetchFirebaseData = async () => {
-      setFirebaseStatus('loading');
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -1570,13 +1565,9 @@ export default function App() {
           if (data.sources !== undefined) {
             setSources(data.sources);
           }
-          setFirebaseStatus('success');
-        } else {
-          setFirebaseStatus('success');
         }
       } catch (error) {
         console.error("Error fetching from Firebase:", error);
-        setFirebaseStatus('error');
       }
     };
     fetchFirebaseData();
@@ -1591,27 +1582,6 @@ export default function App() {
       }, { merge: true });
     } catch (error) {
       console.error(`Error syncing ${field} to Firebase:`, error);
-    }
-  };
-
-  // Save to Firestore function
-  const handleSaveToFirebase = async () => {
-    setFirebaseSaveStatus('saving');
-    try {
-      await setDoc(docRef, {
-        line1: prefaceConfig.line1,
-        line2: prefaceConfig.line2,
-        galleryTitle: galleryTitle,
-        timerLabel: timerLabel,
-        targetDateStr: targetDateStr,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-      setFirebaseSaveStatus('success');
-      setIsFirebaseEditing(false);
-      setTimeout(() => setFirebaseSaveStatus('idle'), 3000);
-    } catch (error) {
-      console.error("Error saving to Firebase:", error);
-      setFirebaseSaveStatus('error');
     }
   };
 
@@ -2564,6 +2534,7 @@ export default function App() {
     setGalleryTitle(tempGalleryTitle);
     saveFieldToFirebase('artMetadataState', tempArtMetadataState);
     saveFieldToFirebase('galleryItemsState', updatedPermanent);
+    saveFieldToFirebase('galleryTitle', tempGalleryTitle);
 
     if (!isLayoutDirty) {
       setIsDirty(false);
@@ -3081,52 +3052,58 @@ export default function App() {
                 </div>
               </div>
 
-              <div className={`intro-section relative ${isFirebaseEditing ? 'ring-2 ring-purple-400 ring-dashed p-4 rounded-lg' : ''}`}>
+              <div className={`intro-section relative ${isEditMode ? 'ring-2 ring-purple-400 ring-dashed p-4 rounded-lg' : ''}`}>
                 {isEditMode && (
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); setActiveEditSection('序言'); }}
                     className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
                   >
                     ✎
                   </button>
                 )}
-                <div 
-                  className={`line line-1 ${isFirebaseEditing ? 'bg-purple-50/50 outline-none cursor-text' : ''}`}
-                  contentEditable={isFirebaseEditing}
+                <div
+                  className={`line line-1 ${isEditMode ? 'bg-purple-50/50 outline-none cursor-text' : ''}`}
+                  contentEditable={isEditMode}
                   suppressContentEditableWarning={true}
                   onBlur={(e) => {
-                    setPrefaceConfig(prev => ({ ...prev, line1: e.currentTarget.textContent || "" }));
+                    const line1 = e.currentTarget.textContent || "";
+                    setPrefaceConfig(prev => ({ ...prev, line1 }));
+                    saveFieldToFirebase('line1', line1);
                   }}
                 >
                   {prefaceConfig.line1}
                 </div>
-                <div 
-                  className={`line line-2 ${isFirebaseEditing ? 'bg-purple-50/50 outline-none cursor-text' : ''}`}
-                  contentEditable={isFirebaseEditing}
+                <div
+                  className={`line line-2 ${isEditMode ? 'bg-purple-50/50 outline-none cursor-text' : ''}`}
+                  contentEditable={isEditMode}
                   suppressContentEditableWarning={true}
                   onBlur={(e) => {
-                    setPrefaceConfig(prev => ({ ...prev, line2: e.currentTarget.textContent || "" }));
+                    const line2 = e.currentTarget.textContent || "";
+                    setPrefaceConfig(prev => ({ ...prev, line2 }));
+                    saveFieldToFirebase('line2', line2);
                   }}
                 >
                   {prefaceConfig.line2}
                 </div>
               </div>
 
-              <div className={`timer-section relative ${isFirebaseEditing ? 'ring-2 ring-purple-400 ring-dashed p-4 rounded-lg' : ''}`}>
+              <div className={`timer-section relative ${isEditMode ? 'ring-2 ring-purple-400 ring-dashed p-4 rounded-lg' : ''}`}>
                 {isEditMode && (
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); setActiveEditSection('計時器'); }}
                     className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#bdbade] hover:bg-[#8a7f9c] flex items-center justify-center text-white text-[10px] font-bold shadow-sm z-[100] transition-colors cursor-pointer"
                   >
                     ✎
                   </button>
                 )}
-                <div 
-                  className={`timer-label ${isFirebaseEditing ? 'bg-purple-50/50 outline-none cursor-text px-2' : ''}`}
-                  contentEditable={isFirebaseEditing}
+                <div
+                  className={`timer-label ${isEditMode ? 'bg-purple-50/50 outline-none cursor-text px-2' : ''}`}
+                  contentEditable={isEditMode}
                   suppressContentEditableWarning={true}
                   onBlur={(e) => {
-                    setTimerLabel(e.currentTarget.textContent || "");
+                    const label = e.currentTarget.textContent || "";
+                    setTimerLabel(label);
+                    saveFieldToFirebase('timerLabel', label);
                   }}
                 >
                   {timerLabel}
@@ -3495,14 +3472,16 @@ export default function App() {
               setActiveVideoIndex={setActiveVideoIndex}
             />
             <div className={`gallery-outer relative ${selectedArt ? 'detail-mode' : ''}`}>
-              <div className={`gallery-title flex items-center justify-center gap-2 ${isFirebaseEditing ? 'ring-2 ring-purple-400 ring-dashed p-1.5 rounded-lg' : ''}`}>
+              <div className={`gallery-title flex items-center justify-center gap-2 ${isEditMode ? 'ring-2 ring-purple-400 ring-dashed p-1.5 rounded-lg' : ''}`}>
                 <span>༺ </span>
                 <span
-                  className={isFirebaseEditing ? 'bg-purple-50/50 outline-none cursor-text px-2 min-w-[50px] inline-block text-center' : ''}
-                  contentEditable={isFirebaseEditing}
+                  className={isEditMode ? 'bg-purple-50/50 outline-none cursor-text px-2 min-w-[50px] inline-block text-center' : ''}
+                  contentEditable={isEditMode}
                   suppressContentEditableWarning={true}
                   onBlur={(e) => {
-                    setGalleryTitle(e.currentTarget.textContent || "");
+                    const title = e.currentTarget.textContent || "";
+                    setGalleryTitle(title);
+                    saveFieldToFirebase('galleryTitle', title);
                   }}
                 >
                   {galleryTitle}
@@ -4808,9 +4787,11 @@ export default function App() {
                       >
                         取消
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setPrefaceConfig(tempPrefaceConfig);
+                          saveFieldToFirebase('line1', tempPrefaceConfig.line1);
+                          saveFieldToFirebase('line2', tempPrefaceConfig.line2);
                           setIsDirty(false);
                           setActiveEditSection(null);
                         }}
@@ -4855,6 +4836,7 @@ export default function App() {
                         onClick={() => {
                           if (isValidDateStr(tempTargetDateStr)) {
                             setTargetDateStr(tempTargetDateStr);
+                            saveFieldToFirebase('targetDateStr', tempTargetDateStr);
                             setIsDirty(false);
                             setActiveEditSection(null);
                           }
@@ -5870,72 +5852,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Firebase Sync & Edit Floating Controller */}
-      <div className="fixed bottom-6 right-6 z-[99999] flex flex-col items-end gap-2 font-sans">
-        {isFirebaseEditing && (
-          <div className="bg-amber-500 text-white text-[11px] px-2.5 py-1 rounded-full shadow-md font-bold animate-pulse">
-            ⚠️ 編輯模式：可直接在畫面上點擊修改文字！
-          </div>
-        )}
-        <div className="bg-white/95 backdrop-blur border border-purple-100 shadow-xl rounded-2xl p-4 flex flex-col gap-3 min-w-[240px] max-w-xs transition-all hover:shadow-2xl">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-            <div className="flex items-center gap-1.5 text-[#8a7f9c] font-bold text-xs">
-              <span className="text-sm">☁️</span>
-              <span>Firebase 雲端同步</span>
-            </div>
-            {/* Status indicators */}
-            <div className="text-[10px] font-semibold">
-              {firebaseStatus === 'loading' && <span className="text-blue-500 animate-pulse">載入中...</span>}
-              {firebaseStatus === 'error' && <span className="text-red-500">載入失敗 ✕</span>}
-              {firebaseStatus === 'success' && firebaseSaveStatus === 'idle' && <span className="text-green-500">已同步 ✓</span>}
-              {firebaseSaveStatus === 'saving' && <span className="text-blue-500 animate-pulse">儲存中...</span>}
-              {firebaseSaveStatus === 'success' && <span className="text-green-500 font-bold">儲存成功 ✓</span>}
-              {firebaseSaveStatus === 'error' && <span className="text-red-500">儲存失敗 ✕</span>}
-            </div>
-          </div>
-
-          <div className="text-[11px] text-gray-500 leading-relaxed">
-            {isFirebaseEditing 
-              ? "您可以直接在首頁點擊「序言」、「計時器名稱」與「畫廊標題」進行編輯，修改完畢後點擊下方儲存。"
-              : "本網頁已與 Firebase Database 即時連接，將在載入時載入最新內容。"}
-          </div>
-
-          <div className="flex gap-2">
-            {!isFirebaseEditing ? (
-              <button
-                type="button"
-                onClick={() => setIsFirebaseEditing(true)}
-                disabled={firebaseStatus === 'loading'}
-                className="flex-1 py-2 bg-[#8a7f9c] hover:bg-[#746db5] text-white text-xs font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50 text-center"
-              >
-                ✎ 切換編輯
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsFirebaseEditing(false);
-                    // Reload to discard unsaved local changes
-                    window.location.reload();
-                  }}
-                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-xl transition-all cursor-pointer text-center"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveToFirebase}
-                  disabled={firebaseSaveStatus === 'saving'}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-50 text-center"
-                >
-                  {firebaseSaveStatus === 'saving' ? "儲存中..." : "💾 儲存"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
