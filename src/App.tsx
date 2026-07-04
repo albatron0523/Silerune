@@ -2593,12 +2593,13 @@ export default function App() {
   const handleDragOverWorldview = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     if (draggedType !== 'worldview' || draggedIndex === null || draggedIndex === idx) return;
-    const items = [...wikiData.worldview];
+    const items = [...tempWikiData.worldview];
     const temp = items[draggedIndex];
     items.splice(draggedIndex, 1);
     items.splice(idx, 0, temp);
     setDraggedIndex(idx);
-    setWikiData({ ...wikiData, worldview: items });
+    setTempWikiData({ ...tempWikiData, worldview: items });
+    setIsDirty(true);
   };
 
   const handleDragStartCountry = (idx: number) => {
@@ -2609,12 +2610,13 @@ export default function App() {
   const handleDragOverCountry = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     if (draggedType !== 'country' || draggedIndex === null || draggedIndex === idx) return;
-    const items = [...wikiData.countries];
+    const items = [...tempWikiData.countries];
     const temp = items[draggedIndex];
     items.splice(draggedIndex, 1);
     items.splice(idx, 0, temp);
     setDraggedIndex(idx);
-    setWikiData({ ...wikiData, countries: items });
+    setTempWikiData({ ...tempWikiData, countries: items });
+    setIsDirty(true);
   };
 
   const handleDragStartFamily = (idx: number) => {
@@ -2625,12 +2627,13 @@ export default function App() {
   const handleDragOverFamily = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     if (draggedType !== 'family' || draggedIndex === null || draggedIndex === idx) return;
-    const items = [...wikiData.families];
+    const items = [...tempWikiData.families];
     const temp = items[draggedIndex];
     items.splice(draggedIndex, 1);
     items.splice(idx, 0, temp);
     setDraggedIndex(idx);
-    setWikiData({ ...wikiData, families: items });
+    setTempWikiData({ ...tempWikiData, families: items });
+    setIsDirty(true);
   };
 
   const handleDragStartDescription = (parentId: string, descIdx: number) => {
@@ -2646,28 +2649,29 @@ export default function App() {
     // Check if it's a country or family
     const isCountry = parentId.startsWith('c-');
     if (isCountry) {
-      const cIdx = wikiData.countries.findIndex(c => c.id === parentId);
+      const cIdx = tempWikiData.countries.findIndex(c => c.id === parentId);
       if (cIdx === -1) return;
-      const descs = [...wikiData.countries[cIdx].descriptions];
+      const descs = [...tempWikiData.countries[cIdx].descriptions];
       const temp = descs[draggedDescriptionIndex];
       descs.splice(draggedDescriptionIndex, 1);
       descs.splice(descIdx, 0, temp);
-      const updatedCountries = [...wikiData.countries];
+      const updatedCountries = [...tempWikiData.countries];
       updatedCountries[cIdx].descriptions = descs;
       setDraggedDescriptionIndex(descIdx);
-      setWikiData({ ...wikiData, countries: updatedCountries });
+      setTempWikiData({ ...tempWikiData, countries: updatedCountries });
     } else {
-      const fIdx = wikiData.families.findIndex(f => f.id === parentId);
+      const fIdx = tempWikiData.families.findIndex(f => f.id === parentId);
       if (fIdx === -1) return;
-      const descs = [...wikiData.families[fIdx].descriptions];
+      const descs = [...tempWikiData.families[fIdx].descriptions];
       const temp = descs[draggedDescriptionIndex];
       descs.splice(draggedDescriptionIndex, 1);
       descs.splice(descIdx, 0, temp);
-      const updatedFamilies = [...wikiData.families];
+      const updatedFamilies = [...tempWikiData.families];
       updatedFamilies[fIdx].descriptions = descs;
       setDraggedDescriptionIndex(descIdx);
-      setWikiData({ ...wikiData, families: updatedFamilies });
+      setTempWikiData({ ...tempWikiData, families: updatedFamilies });
     }
+    setIsDirty(true);
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -4437,6 +4441,7 @@ export default function App() {
                         onClick={() => {
                           const updated = tempChaptersState.filter((_, i) => i !== editingChapterIndex);
                           setChaptersState(updated);
+                          saveFieldToFirebase('chaptersState', updated);
                           setIsDirty(false);
                           setActiveEditSection(null);
                         }}
