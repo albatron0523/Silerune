@@ -1949,22 +1949,22 @@ export default function App() {
       {
         category: "能量",
         title: "魔力增長規律",
-        content: "魔力量並非固定不變，透過冥想與實戰可獲得穩定增長，但每個體質皆存在一個<span class='highlight'>「隱形上限值」</span>，一旦觸及上限，後續的開發難度將呈幾何級數上升。"
+        content: "魔力量並非固定不變，透過冥想與實戰可獲得穩定增長，但每個體質皆存在一個*「隱形上限值」*，一旦觸及上限，後續的開發難度將呈幾何級數上升。"
       },
       {
         category: "技術",
         title: "規模與精度",
-        content: "<span class='highlight'>魔力量</span>直接影響魔法的影響範圍與物理威力；而<span class='highlight'>穩定性</span>則決定了魔法技術的細膩程度。魔力極高但穩定性極低者，容易造成魔力暴走。"
+        content: "*魔力量*直接影響魔法的影響範圍與物理威力；而*穩定性*則決定了魔法技術的細膩程度。魔力極高但穩定性極低者，容易造成魔力暴走。"
       },
       {
         category: "共生",
         title: "魔獸契合度",
-        content: "魔獸與其主人的<span class='highlight'>擅長屬性</span>息息相關。屬性越接近，同步率（Sync Rate）越高，發揮出的複合魔法威力也越強。"
+        content: "魔獸與其主人的*擅長屬性*息息相關。屬性越接近，同步率（Sync Rate）越高，發揮出的複合魔法威力也越強。"
       },
       {
         category: "階級",
         title: "魔獸稀有度",
-        content: "根據學院紀錄，<span class='highlight'>龍</span>為極稀有級別，<span class='highlight'>鳳凰</span>屬於稀有級別。相較之下，蝙蝠、蛇、曜隼與獨角獸等則在貴族階層中較為普遍。"
+        content: "根據學院紀錄，*龍*為極稀有級別，*鳳凰*屬於稀有級別。相較之下，蝙蝠、蛇、曜隼與獨角獸等則在貴族階層中較為普遍。"
       }
     ];
   });

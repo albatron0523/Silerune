@@ -817,6 +817,13 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
       display: none !important; /* Hide fixed full-screen white backdrop on mobile/tablet */
     }
     .gallery-outer.detail-mode .art-col { transition: none !important; }
+    .gallery-outer.detail-mode .scroll-container {
+      /* 桌機版的左右各 100px padding 在手機/平板上會把選中的圖片跟資訊擠到很窄的一小條，
+         導致看起來偏一邊、不置中，而且圖跟文字都被壓得很小。這裡改成小一點的邊距，
+         讓內容能用滿版寬度，flex 的置中設定才會真的看起來置中。 */
+      padding: 10px 16px 40px 16px !important;
+      width: 100% !important;
+    }
     .gallery-outer.detail-mode .art-col:not(:has(.selected)) {
       position: absolute !important;
       visibility: hidden !important;
