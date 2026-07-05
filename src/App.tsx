@@ -1667,18 +1667,28 @@ export default function App() {
 
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [selectedArt, setSelectedArt] = useState<string | null>(null);
-  const prevSelectedArtRef = useRef<string | null>(null);
+  const scrollYBeforeDetailRef = useRef(0);
   useEffect(() => {
-    // 關閉圖片詳細檢視時，detail-mode 的版面高度會瞬間改變，瀏覽器原本的捲動位置
-    // 因此會停在改版後恰好對齊的任何位置（可能落在畫廊跟音樂播放器之間），
-    // 而不是回到畫廊本身。這裡偵測「從有選圖 -> 沒選圖」的瞬間，主動把畫面
-    // 捲回畫廊區塊，避免畫面跳走造成操作不便。
-    if (prevSelectedArtRef.current && !selectedArt) {
-      requestAnimationFrame(() => {
-        document.querySelector('.gallery-outer')?.scrollIntoView({ block: 'start', behavior: 'auto' });
-      });
+    // 「點圖看詳細資訊時背景固定」的正確做法：鎖定 body 的捲動（body scroll lock），
+    // 而不是靠 position:fixed 的疊層去模擬固定背景——後者在手機上跟 detail-mode
+    // 版面高度變化互動時，很容易觸發瀏覽器整頁縮放，也是「返回後跳到奇怪位置」的
+    // 根本原因（版面高度改變後，瀏覽器只是留在同一個像素捲動量，落點自然不對）。
+    // 進入詳細檢視時記錄目前捲動位置、把 body 固定住；離開時解除固定並精準跳回
+    // 原本的捲動位置，畫面就不會跳走。
+    if (selectedArt) {
+      scrollYBeforeDetailRef.current = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollYBeforeDetailRef.current}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    } else {
+      const savedScrollY = scrollYBeforeDetailRef.current;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, savedScrollY);
     }
-    prevSelectedArtRef.current = selectedArt;
   }, [selectedArt]);
   const [randomCharId, setRandomCharId] = useState(0);
   const [seenCharIds, setSeenCharIds] = useState<number[]>([]);
