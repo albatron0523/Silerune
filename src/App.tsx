@@ -1667,6 +1667,19 @@ export default function App() {
 
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [selectedArt, setSelectedArt] = useState<string | null>(null);
+  const prevSelectedArtRef = useRef<string | null>(null);
+  useEffect(() => {
+    // 關閉圖片詳細檢視時，detail-mode 的版面高度會瞬間改變，瀏覽器原本的捲動位置
+    // 因此會停在改版後恰好對齊的任何位置（可能落在畫廊跟音樂播放器之間），
+    // 而不是回到畫廊本身。這裡偵測「從有選圖 -> 沒選圖」的瞬間，主動把畫面
+    // 捲回畫廊區塊，避免畫面跳走造成操作不便。
+    if (prevSelectedArtRef.current && !selectedArt) {
+      requestAnimationFrame(() => {
+        document.querySelector('.gallery-outer')?.scrollIntoView({ block: 'start', behavior: 'auto' });
+      });
+    }
+    prevSelectedArtRef.current = selectedArt;
+  }, [selectedArt]);
   const [randomCharId, setRandomCharId] = useState(0);
   const [seenCharIds, setSeenCharIds] = useState<number[]>([]);
   const [currentTrivia, setCurrentTrivia] = useState("");

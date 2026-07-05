@@ -810,7 +810,8 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     .gallery-outer.detail-mode {
       position: static !important;
       height: auto !important;
-      overflow: visible !important;
+      overflow-x: hidden !important;
+      overflow-y: visible !important;
       min-height: 100vh !important;
     }
     .gallery-outer.detail-mode::before {
@@ -819,10 +820,15 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     .gallery-outer.detail-mode .art-col { transition: none !important; }
     .gallery-outer.detail-mode .scroll-container {
       /* 桌機版的左右各 100px padding 在手機/平板上會把選中的圖片跟資訊擠到很窄的一小條，
-         導致看起來偏一邊、不置中，而且圖跟文字都被壓得很小。這裡改成小一點的邊距，
-         讓內容能用滿版寬度，flex 的置中設定才會真的看起來置中。 */
+         導致看起來偏一邊、不置中，而且圖跟文字都被壓得很小。這裡改成小一點的邊距。
+         注意：不要用 width:100% 去強制撐開這個 inline-flex 容器——那樣在某些圖片
+         尺寸下會造成整體寬度超出螢幕，觸發手機瀏覽器對整個網頁縮放，導致「整個
+         網站變大/縮小」。改用 max-width + box-sizing + overflow-x:hidden 來安全地
+         限制寬度，不去改變容器原本的排版方式。 */
       padding: 10px 16px 40px 16px !important;
-      width: 100% !important;
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
     }
     .gallery-outer.detail-mode .art-col:not(:has(.selected)) {
       position: absolute !important;
