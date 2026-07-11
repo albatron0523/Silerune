@@ -32,6 +32,24 @@ const resolveImageUrl = (input: string): string => {
   return `https://raw.githubusercontent.com/albatron0523/my-illustrations/main/${trimmed}`;
 };
 
+// Renders a list of description strings as "bullet line<br/>continuation line<br/>bullet line..."
+// with no trailing <br/> after the very last line. Items containing "\n" produce
+// an un-bulleted continuation line, matching the previous hand-written markup.
+const renderBulletedLines = (items: string[], bullet: string) => {
+  const lines: { text: string; isFirst: boolean }[] = [];
+  items.forEach((item) => {
+    item.split('\n').forEach((line, idx) => {
+      lines.push({ text: line, isFirst: idx === 0 });
+    });
+  });
+  return lines.map((line, i) => (
+    <React.Fragment key={i}>
+      {line.isFirst ? `${bullet} ${line.text}` : line.text}
+      {i < lines.length - 1 && <br />}
+    </React.Fragment>
+  ));
+};
+
 const renderSupplementContent = (content: string) => {
   if (!content) return "";
   // Convert *text* to <span class='highlight'>text</span>
@@ -3275,161 +3293,61 @@ export default function App() {
                       ✎
                     </button>
                   )}
-                  {charTab === 'c1' && (
+                  {charTab === 'c1' && charactersState.eleanora && (
                     <div className="char-content active">
                       <div className="char-flex">
                         <div className="text-side">
-                          <div className="char-title">艾蕾諾菈·克雷瑟</div>
-                          
-                          <span className="section-title">★ 基本資訊</span>
-                          - 性別：女 / 年齡：12歲 / 身高：148<br />
-                          - 路西恩的聯姻對象
-                          <span className="section-title">★ 外貌與穿著</span>
-                          ✦ 紫羅蘭色長髮+靛藍色瞳眸，如人偶般精緻<br />
-                          ✦ 常綁公主頭配大蝴蝶結，佩戴寶石項鍊(母親送給自己的禮物）
-                          <span className="section-title">★ 個性特質</span>
-                          ✦ 寡言/少笑，認為兩種行為都耗能量<br />
-                          通常講話字數都偏少，大部分回覆以點頭搖頭代替<br />
-                          ✦ 智商超群，魔法資質高，但並沒有要展露頭角的想法<br />
-                          ✦ 洞悉惡意卻反應薄弱，帶點天然呆屬性
+                          <div className="char-title">{charactersState.eleanora.name}</div>
+                          {charactersState.eleanora.sections?.map((section: any, sIdx: number) => (
+                            <React.Fragment key={sIdx}>
+                              <span className="section-title">★ {section.title}</span>
+                              {renderBulletedLines(section.items || [], section.title === '基本資訊' ? '-' : '✦')}
+                            </React.Fragment>
+                          ))}
                         </div>
                         <div className="img-side">
-                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題855_20250528195215 (1).png" alt="Eleanora" referrerPolicy="no-referrer" />
+                          <img src={charactersState.eleanora.imageUrl} alt={charactersState.eleanora.name} referrerPolicy="no-referrer" />
                         </div>
                       </div>
                     </div>
                   )}
-                  {charTab === 'c2' && (
+                  {charTab === 'c2' && charactersState.lucien && (
                     <div className="char-content active">
                       <div className="char-flex">
                         <div className="text-side">
-                          <div className="char-title">路西恩・法雷蒙</div>
-                          
-                          <span className="section-title">★ 基本資訊</span>
-                          - 性別：男 / 年齡：12歲 / 身高：161<br />
-                          - 艾蕾諾菈的聯姻對象
-                          <span className="section-title">★ 外貌與穿著</span>
-                          ✦ 白短髮+不對稱鬢髮，金黃色雙瞳<br />
-                          ✦ 戴黑十字架耳環與白手套
-                          <span className="section-title">★ 個性特質</span>
-                          ✦ 因長期受法雷蒙伯爵與伯爵夫人虐待，養成腹黑屬性<br />
-                          常掛紳士笑容，實則擅長暗諷<br />
-                          ✦ 智商偏高，有操盤政治的潛質，但目前心智不成熟，面對超出預想範圍的事較容易慌亂<br />
-                          ✦ 內在敏感脆弱的傲嬌少年，面對心上人易害羞。
+                          <div className="char-title">{charactersState.lucien.name}</div>
+                          {charactersState.lucien.sections?.map((section: any, sIdx: number) => (
+                            <React.Fragment key={sIdx}>
+                              <span className="section-title">★ {section.title}</span>
+                              {renderBulletedLines(section.items || [], section.title === '基本資訊' ? '-' : '✦')}
+                            </React.Fragment>
+                          ))}
                         </div>
                         <div className="img-side">
-                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題855_20250528195215.png" alt="Lucien" referrerPolicy="no-referrer" />
+                          <img src={charactersState.lucien.imageUrl} alt={charactersState.lucien.name} referrerPolicy="no-referrer" />
                         </div>
                       </div>
                     </div>
                   )}
                   {charTab === 'c3' && (
                     <div className="char-content active">
-                      <div className="support-item">
-                        <div className="support-avatar">
-                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題886_20250618214443.png" alt="Mireille" referrerPolicy="no-referrer" />
-                        </div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 米蕾優·布朗雪</div>
-                          <div className="support-desc">
-                            ✦ 艾蕾諾菈的貼身女僕<br />
-                            ✦ 溫和且是少數能讀懂艾蕾諾菈心意的人<br />
-                            ✦ 過去是在農村成長的平民，力氣頗大也擅長家事
+                      {charactersState.others?.map((other: any, oIdx: number) => (
+                        <div className="support-item" key={oIdx}>
+                          <div className="support-avatar">
+                            {other.avatarUrl ? (
+                              <img src={other.avatarUrl} alt={other.name} referrerPolicy="no-referrer" />
+                            ) : (
+                              other.name?.split('·')[0]
+                            )}
+                          </div>
+                          <div className="support-info">
+                            <div className="support-char-name">✧ {other.name}</div>
+                            <div className="support-desc">
+                              {renderBulletedLines(other.descriptions || [], '✦')}
+                            </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-avatar">
-                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題913_20250708151336.png" alt="Licia" referrerPolicy="no-referrer" />
-                        </div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 莉雪·瑟蘭</div>
-                          <div className="support-desc">
-                            ✦ 瑟蘭侯爵千金<br />
-                            ✦ 家族長年與克雷瑟家不對付，並有野心吞噬對方<br />
-                            ✦ 因家教+心儀路西恩對艾蕾諾菈心生嫉恨<br />
-                            ✦ 擅長社交而擁有不少人脈
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-avatar">席恩</div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 席恩·法雷蒙</div>
-                          <div className="support-desc">
-                            ✦ 路西恩的表哥<br />
-                            ✦ 被父母寵溺+寄予厚望，養成粗俗又自卑的個性，相比路西恩像還沒社會化的小孩<br />
-                            ✦ 嫉妒路西恩所擁有的聲望與能力
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-avatar">
-                          <img src="https://raw.githubusercontent.com/dorastar0523/my-illustrations/main/無標題915_20260109111842.png" alt="Elody" referrerPolicy="no-referrer" />
-                        </div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 艾洛蒂·拉維捏</div>
-                          <div className="support-desc">
-                            ✦ 瓦爾托梅爾的公爵千金<br />
-                            ✦ 艾蕾諾菈的筆友，在學院與她第一次見面並迅速成為常常互動的朋友<br />
-                            ✦ 率真靈活，擅長引導他人走出傷痛
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-avatar">伊維爾</div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 伊維爾·艾凡</div>
-                          <div className="support-desc">
-                            ✦ 魔法學院的校長，古老神話「奧雷菲斯・維洛恩」的後裔，有其遺物<br />
-                            ✦ 小男孩，舉止跳脫古怪，常被誤會是一年級新生<br />
-                            ✦ 魔法實力強大到足以滅國，被譽為「神之子」<br />
-                            ✦ 據說是前校長去世前強推上位的，各國國王其實都怒不敢言
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="support-item">
-                        <div className="support-avatar">卡修斯</div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 卡修斯·塞西爾</div>
-                          <div className="support-desc">
-                            ✦ 希鷺倫的二王子<br />
-                            ✦ 有野心並堅信自己未來會成為這個國家的國王<br />
-                            ✦ 是真的會對自己的人民與政策有所行動，例如：提前制定社福政策、保護素未謀面的人民<br />
-                            ✦ 喜歡艾蕾諾菈，並在明知她已訂婚的情況下試圖拉近距離。<br />
-                            其實他只是認為艾蕾諾菈適合當王妃，但不自知那不是真的愛。
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="support-item">
-                        <div className="support-avatar">奧斯丁</div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 奧斯丁·費雪</div>
-                          <div className="support-desc">
-                            ✦ 伊維爾的管家，現多處理學校行政事物<br />
-                            ✦ 原本生活順遂、自命不凡，因此看不起表現不出色的人，並對學生嚴厲，直到被剝奪貴族地位後，才在平民村落見識何為「人間」，再之後被伊維爾僱用<br />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="support-item">
-                        <div className="support-avatar">管理者</div>
-                        <div className="support-info">
-                          <div className="support-char-name">✧ 管理者</div>
-                          <div className="support-desc">
-                            ✦ 類似於世界神明的存在，但非必要不會回應「禱告」等儀式<br />
-                            ✦ 沒有感情，但會尊重人類的倫理道德<br />
-                            ✦ 本體無實體，因化作人形與人類溝通有利故幻化成神寵想變成的樣子<br />
-                            ✦ 會在人間挑選「神祭」協助管理世界
-                          </div>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   )}
                 </div>
