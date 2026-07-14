@@ -1158,6 +1158,24 @@ h3, .char-title { color: var(--p); font-size: 22px; border-left: 5px solid var(-
     transform: translateY(-1px);
 }
 
+.read-more-btn {
+    margin: 20px 0;
+    padding: 8px 28px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    border: 1.5px solid #8a7f9c;
+    color: #8a7f9c;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.read-more-btn:hover {
+    background-color: #8a7f9c;
+    color: #ffffff;
+}
+
 /* Gallery Detail Styles moved to unified 1024px block above */
 
 @media (max-width: 768px) {

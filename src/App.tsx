@@ -3206,6 +3206,16 @@ export default function App() {
                 </div>
               </div>
 
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  className="read-more-btn"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  Read More
+                </button>
+              </div>
+
               <section className="credits-container">
                 <div className="credits-title flex justify-center items-center w-full">
                   <span>SOURCES 資料來源</span>
